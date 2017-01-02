@@ -3,11 +3,14 @@ class FloatGrayscaleBrush {
   FloatGrayscaleImage _image;
   int _width;
   int _height;
+
   int _size;
   float _value;
   int _step;
   int _prevStepX;
   int _prevStepY;
+
+  String _type;
 
   FloatGrayscaleBrush(FloatGrayscaleImage image, int w, int h) {
     _image = image;
@@ -19,6 +22,8 @@ class FloatGrayscaleBrush {
     _step = 5;
     _prevStepX = 0;
     _prevStepY = 0;
+
+    _type = "square";
   }
 
   int size() {
@@ -66,6 +71,42 @@ class FloatGrayscaleBrush {
 
   void setPixel(int x, int y, color v) {
     _image.setPixel(x, y, v);
+  }
+
+  String type() {
+    return _type;
+  }
+
+  FloatGrayscaleBrush type(String v) {
+    _type = v;
+    return this;
+  }
+
+  void draw(int x, int y) {
+    switch (_type) {
+      case "square":
+        brush.squareBrush(x, y);
+        break;
+      case "squareFalloff":
+        brush.squareFalloffBrush(x, y);
+        break;
+      case "circle":
+        brush.circleBrush(x, y);
+        break;
+      case "circleFalloff":
+        brush.circleFalloffBrush(x, y);
+        break;
+      case "voronoi":
+        brush.voronoiBrush(x, y);
+        break;
+      case "wave":
+        brush.waveBrush(x, y, 55);
+        break;
+      case "waveFalloff":
+        brush.waveFalloffBrush(x, y, 55);
+        break;
+      default:
+    }
   }
 
   void squareBrush(int targetX, int targetY) {

@@ -11,6 +11,7 @@ int imageHeight;
 
 Palette palette;
 PaletteDisplay paletteDisplay;
+RadioButton brushTypeRadio;
 
 PGraphics inputImg, outputImg;
 FloatGrayscaleImage deepImage;
@@ -55,7 +56,8 @@ void setupBrush() {
   brush = new FloatGrayscaleBrush(deepImage, inputImg.width, inputImg.height)
     .size(300)
     .value(32)
-    .step(15);
+    .step(15)
+    .type("waveFalloff");
 }
 
 void setupUi() {
@@ -81,6 +83,23 @@ void setupUi() {
     .setNumberOfTickMarks(50)
     .snapToTickMarks(true)
     .showTickMarks(false);
+
+  brushTypeRadio = cp5.addRadioButton("brushType")
+    .setPosition(margin + paletteWidth + margin + imageWidth + margin, margin + 30 + 30)
+    .setSize(20,20)
+    .setColorForeground(color(120))
+    .setColorActive(color(255))
+    .setColorLabel(color(255))
+    .setSpacingColumn(150)
+    .setItemsPerRow(2)
+    .addItem("square", 0)
+    .addItem("squareFalloff", 1)
+    .addItem("circle", 2)
+    .addItem("circleFalloff", 3)
+    .addItem("voronoi", 4)
+    .addItem("wave", 5)
+    .addItem("waveFalloff", 6)
+    .activate(7);
 }
 
 void setupPalette() {
@@ -214,14 +233,39 @@ void mouseReleased() {
   isDragging = false;
 }
 
+void controlEvent(ControlEvent theEvent) {
+  if(theEvent.isFrom(brushTypeRadio)) {
+    // FIXME: Get the radio button label value instead of switching.
+    println("Brush: " + int(theEvent.getValue()));
+    switch (int(theEvent.getValue())) {
+      case 0:
+        brush.type("square");
+        break;
+      case 1:
+        brush.type("squareFalloff");
+        break;
+      case 2:
+        brush.type("circle");
+        break;
+      case 3:
+        brush.type("circleFalloff");
+        break;
+      case 4:
+        brush.type("voronoi");
+        break;
+      case 5:
+        brush.type("wave");
+        break;
+      case 6:
+        brush.type("waveFalloff");
+        break;
+      default:
+    }
+  }
+}
+
 void drawBrush(int x, int y) {
-  //brush.squareBrush(x, y);
-  //brush.squareFalloffBrush(x, y);
-  //brush.circleBrush(x, y);
-  brush.circleFalloffBrush(x, y);
-  //brush.voronoiBrush(x, y);
-  //brush.waveBrush(x, y, 55);
-  //brush.waveFalloffBrush(x, y, 55);
+  brush.draw(x, y);
 }
 
 boolean mouseHitTestImage() {
