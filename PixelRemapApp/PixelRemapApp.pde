@@ -9,13 +9,8 @@ int paletteWidth;
 int imageWidth;
 int imageHeight;
 
-int paletteIndex;
-ArrayList<String> paletteFilenames;
-color[] palette;
+Palette palette;
 PaletteDisplay paletteDisplay;
-int paletteRepeatCount;
-boolean isMirroredPaletteRepeat;
-boolean isReversedPalette;
 
 PGraphics inputImg, outputImg;
 FloatGrayscaleImage deepImage;
@@ -47,12 +42,10 @@ void setup() {
 
   inputImg = createGraphics(imageWidth, imageHeight, P2D);
   outputImg = createGraphics(imageWidth, imageHeight, P2D);
-
   deepImage = new FloatGrayscaleImage(inputImg.width, inputImg.height);
 
   setupBrush();
   setupUi();
-
   setupPalette();
 
   reset();
@@ -80,7 +73,6 @@ void setupUi() {
     .setSize(240, 20)
     .setRange(0, 1);
 
-  paletteRepeatCount = 1;
   cp5.addSlider("paletteRepeatSlider")
     .setPosition(margin + paletteWidth + margin + imageWidth + margin, margin + 30)
     .setSize(240, 20)
@@ -92,27 +84,26 @@ void setupUi() {
 }
 
 void setupPalette() {
-  isMirroredPaletteRepeat = true;
-  isReversedPalette = false;
-
-  paletteIndex = 0;
-  paletteFilenames = new ArrayList<String>();
-  paletteFilenames.add("powerlines_palette01.png");
-  paletteFilenames.add("stripe02.png");
-  paletteFilenames.add("stripe01.png");
-  paletteFilenames.add("flake04.png");
-  paletteFilenames.add("blacktogradient.png");
-  paletteFilenames.add("neon.png");
-  paletteFilenames.add("flake03.png");
-  paletteFilenames.add("flake02.png");
-  paletteFilenames.add("stripey02.png");
-  paletteFilenames.add("flake01.png");
-  paletteFilenames.add("blobby.png");
-  reloadPalette();
+  palette = new Palette()
+    .repeatCount(1)
+    .isMirrored(false)
+    .isReversed(false)
+    .addFilename("powerlines_palette01.png")
+    .addFilename("stripe02.png")
+    .addFilename("stripe01.png")
+    .addFilename("flake04.png")
+    .addFilename("blacktogradient.png")
+    .addFilename("neon.png")
+    .addFilename("flake03.png")
+    .addFilename("flake02.png")
+    .addFilename("stripey02.png")
+    .addFilename("flake01.png")
+    .addFilename("blobby.png");
+  paletteChanged();
 }
 
 void draw() {
-  updatePaletteRepeatCount();
+  updateRepeatCount();
 
   background(0);
 
@@ -128,17 +119,38 @@ void draw() {
   paletteDisplay.draw(g);
 }
 
-void drawPalette(int paletteX, int paletteY, int paletteWidth, int paletteHeight) {
-  noStroke();
-  fill(32);
-  rect(paletteX, paletteY, paletteWidth, paletteHeight);
-
-  for (int i = 0; i < palette.length; i++) {
-    fill(palette[i]);
-    rect(
-      paletteX, paletteY,
-      paletteWidth, paletteHeight * (1 - (float) i / palette.length));
+void updateRepeatCount() {
+  int sliderValue = max(1, floor(cp5.getController("paletteRepeatSlider").getValue()));
+  if (sliderValue != palette.repeatCount()) {
+    palette.repeatCount(sliderValue);
+    paletteChanged();
   }
+}
+
+void updateOutputImage() {
+  outputImg.loadPixels();
+  for (int y = 0; y < outputImg.height; y++) {
+    for (int x = 0; x < outputImg.width; x++) {
+      outputImg.pixels[(outputImg.height - y - 1) * outputImg.width + x] = translateValue(deepImage.getValue(x, y));
+    }
+  }
+  outputImg.updatePixels();
+}
+
+color translateValue(float v) {
+  color[] colors = palette.getColorsRef();
+  int len = colors.length;
+  float offset = cp5.getController("paletteOffsetSlider").getValue();
+  float value = (v / 256.0 + offset) * len;
+  int index = floor(value % len);
+  if (index >= len) {
+    index--;
+  }
+  return colors[index];
+}
+
+void paletteChanged() {
+  paletteDisplay.setPalette(palette.getColorsRef());
 }
 
 void reset() {
@@ -153,73 +165,15 @@ void reset() {
   deepImage.setImage(inputImg);
 }
 
-void updateOutputImage() {
-  outputImg.loadPixels();
-  for (int y = 0; y < outputImg.height; y++) {
-    for (int x = 0; x < outputImg.width; x++) {
-      outputImg.pixels[(outputImg.height - y - 1) * outputImg.width + x] = translateValue(deepImage.getValue(x, y));
-    }
-  }
-  outputImg.updatePixels();
-}
-
-void loadNextPalette() {
-  paletteIndex = (paletteIndex + 1) % paletteFilenames.size();
-  reloadPalette();
-}
-
-void updatePaletteRepeatCount() {
-  int sliderValue = max(1, floor(cp5.getController("paletteRepeatSlider").getValue()));
-  if (sliderValue != paletteRepeatCount) {
-    paletteRepeatCount = sliderValue;
-    reloadPalette();
-  }
-}
-
-void resetPaletteRepeatCount() {
-  cp5.getController("paletteRepeatSlider").setValue(1);
-}
-
-void reloadPalette() {
-  String paletteFilename = paletteFilenames.get(paletteIndex);
-  loadPalette(paletteFilename);
-}
-
-void loadPalette(String paletteFilename) {
-  println(paletteFilename + " " + paletteRepeatCount);
-  PImage paletteImg = loadImage(paletteFilename);
-  palette = new color[paletteImg.width * paletteRepeatCount];
-  paletteImg.loadPixels();
-  for (int repeat = 0; repeat < paletteRepeatCount; repeat++) {
-    for (int i = 0; i < paletteImg.width; i++) {
-      int index = i;
-      if (isReversedPalette) {
-        index = paletteImg.width - index - 1;
-      }
-      if (isMirroredPaletteRepeat && repeat % 2 == 0) {
-        index = (repeat + 1) * paletteImg.width - index - 1;
-      }
-      else {
-        index = repeat * paletteImg.width + index;
-      }
-      palette[index] = paletteImg.pixels[i];
-    }
-  }
-  paletteDisplay.setPalette(palette);
-}
-
 void keyReleased() {
   switch (key) {
     case 'e':
     case ' ':
       reset();
       break;
-    case 'c':
-      clear();
-      break;
     case 'p':
-      resetPaletteRepeatCount();
-      loadNextPalette();
+      palette.loadNext();
+      paletteChanged();
       break;
     case 't':
       showInputImg = !showInputImg;
@@ -228,12 +182,12 @@ void keyReleased() {
       save(fileNamer.next());
       break;
     case 'm':
-      isMirroredPaletteRepeat = !isMirroredPaletteRepeat;
-      reloadPalette();
+      palette.toggleMirrored();
+      paletteChanged();
       break;
     case 'v':
-      isReversedPalette = !isReversedPalette;
-      reloadPalette();
+      palette.toggleReversed();
+      paletteChanged();
       break;
   }
 }
@@ -274,15 +228,3 @@ boolean mouseHitTestImage() {
   return mouseX > imageX && mouseX < imageX + inputImg.width
       && mouseY > imageY && mouseY < imageY + inputImg.height;
 }
-
-color translateValue(float v) {
-  int len = palette.length;
-  float offset = cp5.getController("paletteOffsetSlider").getValue();
-  float value = (v / 256.0 + offset) * len;
-  int index = floor(value % len);
-  if (index >= len) {
-    index--;
-  }
-  return palette[index];
-}
-

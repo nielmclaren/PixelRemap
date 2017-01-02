@@ -12,6 +12,9 @@ public class PaletteDisplay {
     _y = yArg;
     _w = wArg;
     _h = hArg;
+
+    _palette = new color[1];
+    _palette[0] = color(0);
   }
 
   public void draw(PGraphics g) {
