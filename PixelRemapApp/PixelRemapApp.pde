@@ -21,10 +21,6 @@ PGraphics inputImg, outputImg;
 FloatGrayscaleImage deepImage;
 
 FloatGrayscaleBrush brush;
-float brushValue;
-int brushStep;
-int prevStepX;
-int prevStepY;
 
 int imageX;
 int imageY;
@@ -63,10 +59,10 @@ void setup() {
 }
 
 void setupBrush() {
-  brushStep = 15;
   brush = new FloatGrayscaleBrush(deepImage, inputImg.width, inputImg.height)
     .size(300)
-    .value(32);
+    .value(32)
+    .step(15);
 }
 
 void setupUi() {
@@ -253,9 +249,9 @@ void mousePressed() {
 void mouseDragged() {
   paletteSlider.mouseDragged();
 
-  if (isDragging && stepCheck(mouseX, mouseY)) {
+  if (isDragging && brush.stepCheck(mouseX, mouseY)) {
     drawBrush(mouseX - imageX, mouseY - imageY);
-    stepped(mouseX - imageX, mouseY - imageY);
+    brush.stepped(mouseX - imageX, mouseY - imageY);
   }
 }
 
@@ -264,7 +260,7 @@ void mouseReleased() {
 
   if (isDragging) {
     drawBrush(mouseX - imageX, mouseY - imageY);
-    stepped(mouseX - imageX, mouseY - imageY);
+    brush.stepped(mouseX - imageX, mouseY - imageY);
   }
 
   isDragging = false;
@@ -283,17 +279,6 @@ void drawBrush(int x, int y) {
 boolean mouseHitTestImage() {
   return mouseX > imageX && mouseX < imageX + inputImg.width
       && mouseY > imageY && mouseY < imageY + inputImg.height;
-}
-
-boolean stepCheck(int x, int y) {
-  float dx = x - prevStepX;
-  float dy = y - prevStepY;
-  return brushStep * brushStep < dx * dx  +  dy * dy;
-}
-
-void stepped(int x, int y) {
-  prevStepX = x;
-  prevStepY = y;
 }
 
 color translateValue(float v) {

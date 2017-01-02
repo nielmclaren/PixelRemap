@@ -5,6 +5,9 @@ class FloatGrayscaleBrush {
   int _height;
   int _size;
   float _value;
+  int _step;
+  int _prevStepX;
+  int _prevStepY;
 
   FloatGrayscaleBrush(FloatGrayscaleImage image, int w, int h) {
     _image = image;
@@ -13,6 +16,9 @@ class FloatGrayscaleBrush {
 
     _size = 10;
     _value = 255;
+    _step = 5;
+    _prevStepX = 0;
+    _prevStepY = 0;
   }
 
   int size() {
@@ -30,6 +36,27 @@ class FloatGrayscaleBrush {
 
   FloatGrayscaleBrush value(float v) {
     _value = v;
+    return this;
+  }
+
+  int step() {
+    return _step;
+  }
+
+  FloatGrayscaleBrush step(int v) {
+    _step = v;
+    return this;
+  }
+
+  boolean stepCheck(int x, int y) {
+    float dx = x - _prevStepX;
+    float dy = y - _prevStepY;
+    return _step * _step < dx * dx  +  dy * dy;
+  }
+
+  FloatGrayscaleBrush stepped(int x, int y) {
+    _prevStepX = x;
+    _prevStepY = y;
     return this;
   }
 
