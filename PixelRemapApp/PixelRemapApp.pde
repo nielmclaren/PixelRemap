@@ -12,7 +12,7 @@ int imageHeight;
 int paletteIndex;
 ArrayList<String> paletteFilenames;
 color[] palette;
-PaletteSlider paletteSlider;
+PaletteDisplay paletteDisplay;
 int paletteRepeatCount;
 boolean isMirroredPaletteRepeat;
 boolean isReversedPalette;
@@ -72,13 +72,13 @@ void setupUi() {
   imageX = margin + paletteWidth + margin;
   imageY = margin;
 
+  paletteDisplay = new PaletteDisplay(margin, margin, paletteWidth, height - 2 * margin);
+
   cp5 = new ControlP5(this);
   cp5.addSlider("paletteOffsetSlider")
     .setPosition(margin + paletteWidth + margin + imageWidth + margin, margin)
     .setSize(240, 20)
     .setRange(0, 1);
-
-  paletteSlider = new PaletteSlider(margin, margin, paletteWidth, height - 2 * margin);
 
   paletteRepeatCount = 1;
   cp5.addSlider("paletteRepeatSlider")
@@ -125,7 +125,7 @@ void draw() {
     image(outputImg, imageX, imageY);
   }
 
-  paletteSlider.draw(g);
+  paletteDisplay.draw(g);
 }
 
 void drawPalette(int paletteX, int paletteY, int paletteWidth, int paletteHeight) {
@@ -205,7 +205,7 @@ void loadPalette(String paletteFilename) {
       palette[index] = paletteImg.pixels[i];
     }
   }
-  paletteSlider.setPalette(palette);
+  paletteDisplay.setPalette(palette);
 }
 
 void keyReleased() {
@@ -239,16 +239,12 @@ void keyReleased() {
 }
 
 void mousePressed() {
-  paletteSlider.mousePressed();
-
   if (mouseHitTestImage()) {
     isDragging = true;
   }
 }
 
 void mouseDragged() {
-  paletteSlider.mouseDragged();
-
   if (isDragging && brush.stepCheck(mouseX, mouseY)) {
     drawBrush(mouseX - imageX, mouseY - imageY);
     brush.stepped(mouseX - imageX, mouseY - imageY);
@@ -256,8 +252,6 @@ void mouseDragged() {
 }
 
 void mouseReleased() {
-  paletteSlider.mouseReleased();
-
   if (isDragging) {
     drawBrush(mouseX - imageX, mouseY - imageY);
     brush.stepped(mouseX - imageX, mouseY - imageY);
@@ -283,10 +277,8 @@ boolean mouseHitTestImage() {
 
 color translateValue(float v) {
   int len = palette.length;
-  float paletteLow = len * paletteSlider.getLow();
-  float paletteHigh = len * paletteSlider.getHigh();
   float offset = cp5.getController("paletteOffsetSlider").getValue();
-  float value = map(v, 0, 256, paletteLow, paletteHigh) + offset * len;
+  float value = (v / 256.0 + offset) * len;
   int index = floor(value % len);
   if (index >= len) {
     index--;
