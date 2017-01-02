@@ -5,14 +5,17 @@ String inputFilename;
 ControlP5 cp5;
 
 int margin;
+int paletteWidth;
+int imageWidth;
+int imageHeight;
 
 int paletteIndex;
 ArrayList<String> paletteFilenames;
 color[] palette;
 PaletteSlider paletteSlider;
-int paletteWidth;
 int paletteRepeatCount;
 boolean isMirroredPaletteRepeat;
+boolean isReversedPalette;
 
 PGraphics inputImg, outputImg;
 FloatGrayscaleImage deepImage;
@@ -37,14 +40,46 @@ void setup() {
   smooth();
 
   inputFilename = "input.png";
-  PImage inputTempImg = loadImage(inputFilename);
 
+  PImage inputTempImg = loadImage(inputFilename);
+  imageWidth = inputTempImg.width;
+  imageHeight = inputTempImg.height;
+
+  showInputImg = false;
+  isDragging = false;
+
+  fileNamer = new FileNamer("output/export", "png");
+
+  inputImg = createGraphics(imageWidth, imageHeight, P2D);
+  outputImg = createGraphics(imageWidth, imageHeight, P2D);
+
+  deepImage = new FloatGrayscaleImage(inputImg.width, inputImg.height);
+
+  setupBrush();
+  setupUi();
+
+  setupPalette();
+
+  reset();
+}
+
+void setupBrush() {
+  brushValue = 32;
+  brushStep = 15;
+  brushSize = 300;
+  brush = new FloatGrayscaleBrush(deepImage, inputImg.width, inputImg.height);
+}
+
+void setupUi() {
   margin = 15;
   paletteWidth = 40;
 
+  imageX = margin + paletteWidth + margin;
+  imageY = margin;
+
   cp5 = new ControlP5(this);
   cp5.addSlider("paletteOffsetSlider")
-    .setPosition(margin + paletteWidth + margin + inputTempImg.width + margin, margin)
+    .setPosition(margin + paletteWidth + margin + imageWidth + margin, margin)
     .setSize(240, 20)
     .setRange(0, 1);
 
@@ -52,18 +87,22 @@ void setup() {
 
   paletteRepeatCount = 1;
   cp5.addSlider("paletteRepeatSlider")
-    .setPosition(margin + paletteWidth + margin + inputTempImg.width + margin, margin + 30)
+    .setPosition(margin + paletteWidth + margin + imageWidth + margin, margin + 30)
     .setSize(240, 20)
     .setRange(1, 50)
     .setValue(1)
     .setNumberOfTickMarks(50)
     .snapToTickMarks(true)
     .showTickMarks(false);
+}
 
+void setupPalette() {
   isMirroredPaletteRepeat = true;
+  isReversedPalette = false;
 
   paletteIndex = 0;
   paletteFilenames = new ArrayList<String>();
+  paletteFilenames.add("powerlines_palette01.png");
   paletteFilenames.add("stripe02.png");
   paletteFilenames.add("stripe01.png");
   paletteFilenames.add("flake04.png");
@@ -75,23 +114,6 @@ void setup() {
   paletteFilenames.add("flake01.png");
   paletteFilenames.add("blobby.png");
   reloadPalette();
-
-  showInputImg = false;
-  isDragging = false;
-
-  fileNamer = new FileNamer("output/export", "png");
-
-  inputImg = createGraphics(inputTempImg.width, inputTempImg.height, P2D);
-  outputImg = createGraphics(inputImg.width, inputImg.height, P2D);
-  
-  deepImage = new FloatGrayscaleImage(inputImg.width, inputImg.height);
-  
-  brushValue = 32;
-  brushStep = 15;
-  brushSize = 300;
-  brush = new FloatGrayscaleBrush(deepImage, inputImg.width, inputImg.height);
-
-  reset();
 }
 
 void draw() {
@@ -99,15 +121,12 @@ void draw() {
 
   background(0);
 
-  imageX = margin + paletteWidth + margin;
-  imageY = margin;
-
   if (showInputImg) {
     PImage inputImage = deepImage.getImageRef();
     image(inputImage, imageX, imageY);
   }
   else {
-    updateOutputImg();
+    updateOutputImage();
     image(outputImg, imageX, imageY);
   }
 
@@ -135,15 +154,11 @@ void reset() {
   inputImg.endDraw();
 
   inputImg.loadPixels();
-  
+
   deepImage.setImage(inputImg);
 }
 
-void toggleInputOutput() {
-  showInputImg = !showInputImg;
-}
-
-void updateOutputImg() {
+void updateOutputImage() {
   outputImg.loadPixels();
   for (int y = 0; y < outputImg.height; y++) {
     for (int x = 0; x < outputImg.width; x++) {
@@ -182,12 +197,15 @@ void loadPalette(String paletteFilename) {
   paletteImg.loadPixels();
   for (int repeat = 0; repeat < paletteRepeatCount; repeat++) {
     for (int i = 0; i < paletteImg.width; i++) {
-      int index;
+      int index = i;
+      if (isReversedPalette) {
+        index = paletteImg.width - index - 1;
+      }
       if (isMirroredPaletteRepeat && repeat % 2 == 0) {
-        index = (repeat + 1) * paletteImg.width - i - 1;
+        index = (repeat + 1) * paletteImg.width - index - 1;
       }
       else {
-        index = repeat * paletteImg.width + i;
+        index = repeat * paletteImg.width + index;
       }
       palette[index] = paletteImg.pixels[i];
     }
@@ -209,13 +227,17 @@ void keyReleased() {
       loadNextPalette();
       break;
     case 't':
-      toggleInputOutput();
+      showInputImg = !showInputImg;
       break;
     case 'r':
       save(fileNamer.next());
       break;
     case 'm':
       isMirroredPaletteRepeat = !isMirroredPaletteRepeat;
+      reloadPalette();
+      break;
+    case 'v':
+      isReversedPalette = !isReversedPalette;
       reloadPalette();
       break;
   }
@@ -253,10 +275,10 @@ void drawBrush(int x, int y) {
   //brush.squareBrush(x, y, brushSize, brushValue);
   //brush.squareFalloffBrush(x, y, brushSize, brushValue);
   //brush.circleBrush(x, y, brushSize, brushValue);
-  //brush.circleFalloffBrush(x, y, brushSize, brushValue);
+  brush.circleFalloffBrush(x, y, brushSize, brushValue);
   //brush.voronoiBrush(x, y, brushSize, brushValue);
   //brush.waveBrush(x, y, brushSize, 55, brushValue);
-  brush.waveFalloffBrush(x, y, brushSize, 55, brushValue);
+  //brush.waveFalloffBrush(x, y, brushSize, 55, brushValue);
 }
 
 boolean mouseHitTestImage() {
@@ -288,10 +310,3 @@ color translateValue(float v) {
   return palette[index];
 }
 
-float randf(float low, float high) {
-  return low + random(1) * (high - low);
-}
-
-int randi(int low, int high) {
-  return low + floor(random(1) * (high - low));
-}
