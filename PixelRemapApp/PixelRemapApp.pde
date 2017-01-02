@@ -21,7 +21,6 @@ PGraphics inputImg, outputImg;
 FloatGrayscaleImage deepImage;
 
 FloatGrayscaleBrush brush;
-int brushSize;
 float brushValue;
 int brushStep;
 int prevStepX;
@@ -64,10 +63,10 @@ void setup() {
 }
 
 void setupBrush() {
-  brushValue = 32;
   brushStep = 15;
-  brushSize = 300;
-  brush = new FloatGrayscaleBrush(deepImage, inputImg.width, inputImg.height);
+  brush = new FloatGrayscaleBrush(deepImage, inputImg.width, inputImg.height)
+    .size(300)
+    .value(32);
 }
 
 void setupUi() {
@@ -272,13 +271,13 @@ void mouseReleased() {
 }
 
 void drawBrush(int x, int y) {
-  //brush.squareBrush(x, y, brushSize, brushValue);
-  //brush.squareFalloffBrush(x, y, brushSize, brushValue);
-  //brush.circleBrush(x, y, brushSize, brushValue);
-  brush.circleFalloffBrush(x, y, brushSize, brushValue);
-  //brush.voronoiBrush(x, y, brushSize, brushValue);
-  //brush.waveBrush(x, y, brushSize, 55, brushValue);
-  //brush.waveFalloffBrush(x, y, brushSize, 55, brushValue);
+  //brush.squareBrush(x, y);
+  //brush.squareFalloffBrush(x, y);
+  //brush.circleBrush(x, y);
+  brush.circleFalloffBrush(x, y);
+  //brush.voronoiBrush(x, y);
+  //brush.waveBrush(x, y, 55);
+  //brush.waveFalloffBrush(x, y, 55);
 }
 
 boolean mouseHitTestImage() {
