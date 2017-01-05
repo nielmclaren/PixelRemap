@@ -133,6 +133,7 @@ void setupPalette() {
     .repeatCount(1)
     .isMirrored(false)
     .isReversed(false)
+    .addFilename("mirage_sunset.png")
     .addFilename("neon.png")
     .addFilename("powerlines_palette01.png")
     .addFilename("vaporwave.png")
@@ -254,11 +255,12 @@ void keyReleased() {
 void mousePressed() {
   if (mouseHitTestImage()) {
     isDragging = true;
+    brush.stepped(mouseX - imageX, mouseY - imageY);
   }
 }
 
 void mouseDragged() {
-  if (isDragging && brush.stepCheck(mouseX, mouseY)) {
+  if (isDragging && brush.stepCheck(mouseX - imageX, mouseY - imageY)) {
     drawBrush(mouseX - imageX, mouseY - imageY);
     brush.stepped(mouseX - imageX, mouseY - imageY);
   }
