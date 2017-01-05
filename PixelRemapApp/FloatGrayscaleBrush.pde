@@ -133,8 +133,6 @@ class FloatGrayscaleBrush {
   }
 
   void squareFalloffBrush(int targetX, int targetY) {
-    float falloff = 0.88;
-
     for (int x = targetX - _size; x <= targetX + _size; x++) {
       if (x < 0 || x >= _width) continue;
       for (int y = targetY - _size; y <= targetY + _size; y++) {
@@ -143,7 +141,7 @@ class FloatGrayscaleBrush {
         float dy = abs(y - targetY);
 
         float factor = max(dx, dy) / _size;
-        factor = 1 + 1 / pow(factor + falloff, 2) - 1 / pow(falloff, 2);
+        factor = getFalloff(factor);
         factor = constrain(factor, 0, 1);
 
         float currentValue = _image.getValue(x, y);
@@ -167,7 +165,6 @@ class FloatGrayscaleBrush {
   }
 
   void circleFalloffBrush(int targetX, int targetY) {
-    float falloff = 0.88;
     int brushSizeSq = _size * _size;
 
     for (int x = targetX - _size; x <= targetX + _size; x++) {
@@ -180,7 +177,7 @@ class FloatGrayscaleBrush {
         if (dSq > brushSizeSq) continue;
 
         float factor = sqrt(dSq) / _size;
-        factor = 1 + 1 / pow(factor + falloff, 2) - 1 / pow(falloff, 2);
+        factor = getFalloff(factor);
         factor = constrain(factor, 0, 1);
 
         float currentValue = _image.getValue(x, y);
@@ -223,7 +220,6 @@ class FloatGrayscaleBrush {
   }
 
   void waveFalloffBrush(int targetX, int targetY, float wavelength) {
-    float falloff = 0.88;
     for (int x = targetX - _size; x <= targetX + _size; x++) {
       if (x < 0 || x >= _width) continue;
       for (int y = targetY - _size; y <= targetY + _size; y++) {
@@ -234,7 +230,7 @@ class FloatGrayscaleBrush {
         if (d > _size) continue;
 
         float factor = d / _size;
-        factor = 1 + 1 / pow(factor + falloff, 2) - 1 / pow(falloff, 2);
+        factor = getFalloff(factor);
         factor = constrain(factor, 0, 1);
 
         factor *= (cos(d / wavelength * (2 * PI)) + 1) / 2;
@@ -243,5 +239,10 @@ class FloatGrayscaleBrush {
         _image.setValue(x, y, constrain(currentValue + factor * _value, 0, 255));
       }
     }
+  }
+
+  private float getFalloff(float v) {
+    float falloff = 0.88;
+    return 1 + 1 / pow(v + falloff, 2) - 1 / pow(falloff, 2);
   }
 }
