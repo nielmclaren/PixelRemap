@@ -12,6 +12,8 @@ class FloatGrayscaleBrush {
 
   String _type;
 
+  float _wavelength;
+
   FloatGrayscaleBrush(FloatGrayscaleImage image, int w, int h) {
     _image = image;
     _width = w;
@@ -24,6 +26,8 @@ class FloatGrayscaleBrush {
     _prevStepY = 0;
 
     _type = "square";
+
+    _wavelength = 55;
   }
 
   int size() {
@@ -82,6 +86,15 @@ class FloatGrayscaleBrush {
     return this;
   }
 
+  float wavelength() {
+    return _wavelength;
+  }
+
+  FloatGrayscaleBrush wavelength(float v) {
+    _wavelength = v;
+    return this;
+  }
+
   void draw(int x, int y) {
     switch (_type) {
       case "square":
@@ -100,10 +113,10 @@ class FloatGrayscaleBrush {
         brush.voronoiBrush(x, y);
         break;
       case "wave":
-        brush.waveBrush(x, y, 55);
+        brush.waveBrush(x, y, _wavelength);
         break;
       case "waveFalloff":
-        brush.waveFalloffBrush(x, y, 55);
+        brush.waveFalloffBrush(x, y, _wavelength);
         break;
       default:
     }
@@ -191,7 +204,7 @@ class FloatGrayscaleBrush {
     }
   }
 
-  void waveBrush(int targetX, int targetY, int wavelength) {
+  void waveBrush(int targetX, int targetY, float wavelength) {
     for (int x = targetX - _size; x <= targetX + _size; x++) {
       if (x < 0 || x >= _width) continue;
       for (int y = targetY - _size; y <= targetY + _size; y++) {
@@ -209,7 +222,7 @@ class FloatGrayscaleBrush {
     }
   }
 
-  void waveFalloffBrush(int targetX, int targetY, int wavelength) {
+  void waveFalloffBrush(int targetX, int targetY, float wavelength) {
     float falloff = 0.88;
     for (int x = targetX - _size; x <= targetX + _size; x++) {
       if (x < 0 || x >= _width) continue;

@@ -100,6 +100,12 @@ void setupUi() {
     .addItem("wave", 5)
     .addItem("waveFalloff", 6)
     .activate(7);
+
+  cp5.addSlider("brushSizeSlider")
+    .setPosition(margin + paletteWidth + margin + imageWidth + margin, margin + 30 + 30 + 100)
+    .setSize(240, 20)
+    .setRange(1, 500)
+    .setValue(150);
 }
 
 void setupPalette() {
@@ -108,6 +114,7 @@ void setupPalette() {
     .isMirrored(false)
     .isReversed(false)
     .addFilename("powerlines_palette01.png")
+    .addFilename("vaporwave.png")
     .addFilename("stripe02.png")
     .addFilename("stripe01.png")
     .addFilename("flake04.png")
@@ -136,6 +143,19 @@ void draw() {
   }
 
   paletteDisplay.draw(g);
+
+  if (mouseHitTestImage()) {
+    drawBrushSize();
+  }
+}
+
+void drawBrushSize() {
+  noFill();
+  stroke(128);
+  strokeWeight(2);
+
+  ellipseMode(RADIUS);
+  ellipse(mouseX, mouseY, brush.size(), brush.size());
 }
 
 void updateRepeatCount() {
@@ -233,11 +253,11 @@ void mouseReleased() {
   isDragging = false;
 }
 
-void controlEvent(ControlEvent theEvent) {
-  if(theEvent.isFrom(brushTypeRadio)) {
+void controlEvent(ControlEvent event) {
+  if(event.isFrom(brushTypeRadio)) {
     // FIXME: Get the radio button label value instead of switching.
-    println("Brush: " + int(theEvent.getValue()));
-    switch (int(theEvent.getValue())) {
+    println("Brush: " + int(event.getValue()));
+    switch (int(event.getValue())) {
       case 0:
         brush.type("square");
         break;
@@ -261,6 +281,8 @@ void controlEvent(ControlEvent theEvent) {
         break;
       default:
     }
+  } else if (event.isFrom(cp5.getController("brushSizeSlider"))) {
+    brush.size(floor(event.getValue()));
   }
 }
 
