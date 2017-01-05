@@ -61,6 +61,8 @@ void setupBrush() {
 }
 
 void setupUi() {
+  int currX = margin + paletteWidth + margin + imageWidth + margin;
+  int currY = margin;
   margin = 15;
   paletteWidth = 40;
 
@@ -71,21 +73,23 @@ void setupUi() {
 
   cp5 = new ControlP5(this);
   cp5.addSlider("paletteOffsetSlider")
-    .setPosition(margin + paletteWidth + margin + imageWidth + margin, margin)
+    .setPosition(currX, currY)
     .setSize(240, 20)
     .setRange(0, 1);
+  currY += 30;
 
   cp5.addSlider("paletteRepeatSlider")
-    .setPosition(margin + paletteWidth + margin + imageWidth + margin, margin + 30)
+    .setPosition(currX, currY)
     .setSize(240, 20)
     .setRange(1, 50)
     .setValue(1)
     .setNumberOfTickMarks(50)
     .snapToTickMarks(true)
     .showTickMarks(false);
+  currY += 30;
 
   brushTypeRadio = cp5.addRadioButton("brushType")
-    .setPosition(margin + paletteWidth + margin + imageWidth + margin, margin + 30 + 30)
+    .setPosition(currX, currY)
     .setSize(20,20)
     .setColorForeground(color(120))
     .setColorActive(color(255))
@@ -100,12 +104,28 @@ void setupUi() {
     .addItem("wave", 5)
     .addItem("waveFalloff", 6)
     .activate(7);
+  currY += 100;
+
+  cp5.addSlider("brushValueSlider")
+    .setPosition(currX, currY)
+    .setSize(240, 20)
+    .setRange(0, 255)
+    .setValue(32);
+  currY += 30;
 
   cp5.addSlider("brushSizeSlider")
-    .setPosition(margin + paletteWidth + margin + imageWidth + margin, margin + 30 + 30 + 100)
+    .setPosition(currX, currY)
     .setSize(240, 20)
     .setRange(1, 500)
     .setValue(150);
+  currY += 30;
+
+  cp5.addSlider("brushWavelengthSlider")
+    .setPosition(currX, currY)
+    .setSize(240, 20)
+    .setRange(1, 250)
+    .setValue(50);
+  currY += 30;
 }
 
 void setupPalette() {
@@ -113,13 +133,13 @@ void setupPalette() {
     .repeatCount(1)
     .isMirrored(false)
     .isReversed(false)
+    .addFilename("neon.png")
     .addFilename("powerlines_palette01.png")
     .addFilename("vaporwave.png")
     .addFilename("stripe02.png")
     .addFilename("stripe01.png")
     .addFilename("flake04.png")
     .addFilename("blacktogradient.png")
-    .addFilename("neon.png")
     .addFilename("flake03.png")
     .addFilename("flake02.png")
     .addFilename("stripey02.png")
@@ -281,8 +301,12 @@ void controlEvent(ControlEvent event) {
         break;
       default:
     }
+  } else if (event.isFrom(cp5.getController("brushValueSlider"))) {
+    brush.value(event.getValue());
   } else if (event.isFrom(cp5.getController("brushSizeSlider"))) {
     brush.size(floor(event.getValue()));
+  } else if (event.isFrom(cp5.getController("brushWavelengthSlider"))) {
+    brush.wavelength(event.getValue());
   }
 }
 
