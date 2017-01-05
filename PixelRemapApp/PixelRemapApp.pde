@@ -8,6 +8,8 @@ int margin;
 int paletteWidth;
 int imageWidth;
 int imageHeight;
+int imageX;
+int imageY;
 
 Palette palette;
 PaletteDisplay paletteDisplay;
@@ -17,9 +19,6 @@ PGraphics inputImg, outputImg;
 FloatGrayscaleImage deepImage;
 
 FloatGrayscaleBrush brush;
-
-int imageX;
-int imageY;
 
 boolean showInputImg;
 boolean isDragging;
@@ -43,7 +42,7 @@ void setup() {
 
   inputImg = createGraphics(imageWidth, imageHeight, P2D);
   outputImg = createGraphics(imageWidth, imageHeight, P2D);
-  deepImage = new FloatGrayscaleImage(inputImg.width, inputImg.height);
+  deepImage = new FloatGrayscaleImage(imageWidth, imageHeight);
 
   setupBrush();
   setupUi();
@@ -53,7 +52,7 @@ void setup() {
 }
 
 void setupBrush() {
-  brush = new FloatGrayscaleBrush(deepImage, inputImg.width, inputImg.height)
+  brush = new FloatGrayscaleBrush(deepImage, imageWidth, imageHeight)
     .size(300)
     .value(32)
     .step(15)
@@ -61,13 +60,14 @@ void setupBrush() {
 }
 
 void setupUi() {
-  int currX = margin + paletteWidth + margin + imageWidth + margin;
-  int currY = margin;
   margin = 15;
   paletteWidth = 40;
 
   imageX = margin + paletteWidth + margin;
   imageY = margin;
+
+  int currX = imageX + imageWidth + margin;
+  int currY = margin;
 
   paletteDisplay = new PaletteDisplay(margin, margin, paletteWidth, height - 2 * margin);
 
@@ -155,11 +155,11 @@ void draw() {
 
   if (showInputImg) {
     PImage inputImage = deepImage.getImageRef();
-    image(inputImage, imageX, imageY);
+    image(inputImage, imageX, imageY, imageWidth, imageHeight);
   }
   else {
     updateOutputImage();
-    image(outputImg, imageX, imageY);
+    image(outputImg, imageX, imageY, imageWidth, imageHeight);
   }
 
   paletteDisplay.draw(g);
@@ -315,6 +315,6 @@ void drawBrush(int x, int y) {
 }
 
 boolean mouseHitTestImage() {
-  return mouseX > imageX && mouseX < imageX + inputImg.width
-      && mouseY > imageY && mouseY < imageY + inputImg.height;
+  return mouseX > imageX && mouseX < imageX + imageWidth
+      && mouseY > imageY && mouseY < imageY + imageHeight;
 }
