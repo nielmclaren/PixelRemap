@@ -133,6 +133,7 @@ void setupPalette() {
     .repeatCount(1)
     .isMirrored(false)
     .isReversed(false)
+    .addFilename("isograd.png")
     .addFilename("mirage_sunset.png")
     .addFilename("neon.png")
     .addFilename("powerlines_palette01.png")
@@ -223,6 +224,42 @@ void reset() {
   inputImg.loadPixels();
 
   deepImage.setImage(inputImg);
+
+  drawThing();
+}
+
+void drawThing() {
+  int numCols = 10;
+  int numRows = 10;
+  int hexSize = 100;
+
+  brush
+    .type("waveFalloff")
+    .value(164)
+    .size(192)
+    .wavelength(32);
+
+  for (int col = 0; col < numCols; col++) {
+    for (int row = 0; row < numRows; row++) {
+      float x = indexToWorldX(hexSize, col, row);
+      float y = indexToWorldY(hexSize, col, row);
+      drawBrush(floor(x), floor(y));
+      drawBrush(floor(x), floor(y));
+    }
+  }
+}
+
+float indexToWorldX(int hexSize, int c, int r) {
+  return c * hexSize * 1.5;
+}
+
+float indexToWorldY(int hexSize, int c, int r) {
+  float half = hexSize / 2;
+  float h = half * tan(PI/3);
+  if (c % 2 == 0) {
+    return 2 * r * h;
+  }
+  return (2 * r + 1) * h;
 }
 
 void keyReleased() {
