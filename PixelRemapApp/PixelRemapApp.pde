@@ -97,12 +97,13 @@ void setupUi() {
     .setSpacingColumn(150)
     .setItemsPerRow(2)
     .addItem("square", 0)
-    .addItem("squareFalloff", 1)
-    .addItem("circle", 2)
-    .addItem("circleFalloff", 3)
-    .addItem("voronoi", 4)
-    .addItem("wave", 5)
-    .addItem("waveFalloff", 6)
+    .addItem("rect", 1)
+    .addItem("squareFalloff", 2)
+    .addItem("circle", 3)
+    .addItem("circleFalloff", 4)
+    .addItem("voronoi", 5)
+    .addItem("wave", 6)
+    .addItem("waveFalloff", 7)
     .activate(7);
   currY += 100;
 
@@ -284,21 +285,24 @@ void controlEvent(ControlEvent event) {
         brush.type("square");
         break;
       case 1:
-        brush.type("squareFalloff");
+        brush.type("rect");
         break;
       case 2:
-        brush.type("circle");
+        brush.type("squareFalloff");
         break;
       case 3:
-        brush.type("circleFalloff");
+        brush.type("circle");
         break;
       case 4:
-        brush.type("voronoi");
+        brush.type("circleFalloff");
         break;
       case 5:
-        brush.type("wave");
+        brush.type("voronoi");
         break;
       case 6:
+        brush.type("wave");
+        break;
+      case 7:
         brush.type("waveFalloff");
         break;
       default:

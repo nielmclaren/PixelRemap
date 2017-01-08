@@ -1,10 +1,13 @@
 
 class FloatGrayscaleBrush {
   FloatGrayscaleImage _image;
+  int _imageWidth;
+  int _imageHeight;
+
+  int _size;
   int _width;
   int _height;
 
-  int _size;
   float _value;
   int _step;
   int _prevStepX;
@@ -16,10 +19,13 @@ class FloatGrayscaleBrush {
 
   FloatGrayscaleBrush(FloatGrayscaleImage image, int w, int h) {
     _image = image;
-    _width = w;
-    _height = h;
+    _imageWidth = w;
+    _imageHeight = h;
 
     _size = 10;
+    _width = 50;
+    _height = 30;
+
     _value = 255;
     _step = 5;
     _prevStepX = 0;
@@ -36,6 +42,24 @@ class FloatGrayscaleBrush {
 
   FloatGrayscaleBrush size(int v) {
     _size = v;
+    return this;
+  }
+
+  int width() {
+    return _width;
+  }
+
+  FloatGrayscaleBrush width(int v) {
+    _width = v;
+    return this;
+  }
+
+  int height() {
+    return _height;
+  }
+
+  FloatGrayscaleBrush height(int v) {
+    _height = v;
     return this;
   }
 
@@ -100,6 +124,9 @@ class FloatGrayscaleBrush {
       case "square":
         brush.squareBrush(x, y);
         break;
+      case "rect":
+        brush.rectBrush(x, y);
+        break;
       case "squareFalloff":
         brush.squareFalloffBrush(x, y);
         break;
@@ -124,9 +151,22 @@ class FloatGrayscaleBrush {
 
   void squareBrush(int targetX, int targetY) {
     for (int x = targetX - _size; x <= targetX + _size; x++) {
-      if (x < 0 || x >= _width) continue;
+      if (x < 0 || x >= _imageWidth) continue;
       for (int y = targetY - _size; y <= targetY + _size; y++) {
-        if (y < 0 || y >= _width) continue;
+        if (y < 0 || y >= _imageWidth) continue;
+        _image.setValue(x, y, _image.getValue(x, y) + 0.5 * _value);
+      }
+    }
+  }
+
+  void rectBrush(int targetX, int targetY) {
+    int halfWidth = floor(_width/2);
+    int halfHeight = floor(_height/2);
+
+    for (int x = targetX - halfWidth; x <= targetX + halfWidth; x++) {
+      if (x < 0 || x >= _imageWidth) continue;
+      for (int y = targetY - halfHeight; y <= targetY + halfHeight; y++) {
+        if (y < 0 || y >= _imageWidth) continue;
         _image.setValue(x, y, _image.getValue(x, y) + 0.5 * _value);
       }
     }
@@ -134,9 +174,9 @@ class FloatGrayscaleBrush {
 
   void squareFalloffBrush(int targetX, int targetY) {
     for (int x = targetX - _size; x <= targetX + _size; x++) {
-      if (x < 0 || x >= _width) continue;
+      if (x < 0 || x >= _imageWidth) continue;
       for (int y = targetY - _size; y <= targetY + _size; y++) {
-        if (y < 0 || y >= _height) continue;
+        if (y < 0 || y >= _imageHeight) continue;
         float dx = abs(x - targetX);
         float dy = abs(y - targetY);
 
@@ -152,9 +192,9 @@ class FloatGrayscaleBrush {
 
   void circleBrush(int targetX, int targetY) {
     for (int x = targetX - _size; x <= targetX + _size; x++) {
-      if (x < 0 || x >= _width) continue;
+      if (x < 0 || x >= _imageWidth) continue;
       for (int y = targetY - _size; y <= targetY + _size; y++) {
-        if (y < 0 || y >= _height) continue;
+        if (y < 0 || y >= _imageHeight) continue;
         float dx = x - targetX;
         float dy = y - targetY;
         if (dx * dx  +  dy * dy > _size * _size) continue;
@@ -168,9 +208,9 @@ class FloatGrayscaleBrush {
     int brushSizeSq = _size * _size;
 
     for (int x = targetX - _size; x <= targetX + _size; x++) {
-      if (x < 0 || x >= _width) continue;
+      if (x < 0 || x >= _imageWidth) continue;
       for (int y = targetY - _size; y <= targetY + _size; y++) {
-        if (y < 0 || y >= _height) continue;
+        if (y < 0 || y >= _imageHeight) continue;
         float dx = x - targetX;
         float dy = y - targetY;
         float dSq = dx * dx + dy * dy;
@@ -188,9 +228,9 @@ class FloatGrayscaleBrush {
 
   void voronoiBrush(int targetX, int targetY) {
     for (int x = targetX - _size; x <= targetX + _size; x++) {
-      if (x < 0 || x >= _width) continue;
+      if (x < 0 || x >= _imageWidth) continue;
       for (int y = targetY - _size; y <= targetY + _size; y++) {
-        if (y < 0 || y >= _height) continue;
+        if (y < 0 || y >= _imageHeight) continue;
         float dx = x - targetX;
         float dy = y - targetY;
         float v = constrain(map(dx * dx + dy * dy, 0, _size * _size, _value, 0), 0, 255);
@@ -203,9 +243,9 @@ class FloatGrayscaleBrush {
 
   void waveBrush(int targetX, int targetY, float wavelength) {
     for (int x = targetX - _size; x <= targetX + _size; x++) {
-      if (x < 0 || x >= _width) continue;
+      if (x < 0 || x >= _imageWidth) continue;
       for (int y = targetY - _size; y <= targetY + _size; y++) {
-        if (y < 0 || y >= _height) continue;
+        if (y < 0 || y >= _imageHeight) continue;
         float dx = x - targetX;
         float dy = y - targetY;
         float d = sqrt(dx * dx  +  dy * dy);
@@ -221,9 +261,9 @@ class FloatGrayscaleBrush {
 
   void waveFalloffBrush(int targetX, int targetY, float wavelength) {
     for (int x = targetX - _size; x <= targetX + _size; x++) {
-      if (x < 0 || x >= _width) continue;
+      if (x < 0 || x >= _imageWidth) continue;
       for (int y = targetY - _size; y <= targetY + _size; y++) {
-        if (y < 0 || y >= _height) continue;
+        if (y < 0 || y >= _imageHeight) continue;
         float dx = x - targetX;
         float dy = y - targetY;
         float d = sqrt(dx * dx  +  dy * dy);
