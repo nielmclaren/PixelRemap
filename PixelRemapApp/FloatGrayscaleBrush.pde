@@ -31,7 +31,7 @@ class FloatGrayscaleBrush {
     _prevStepX = 0;
     _prevStepY = 0;
 
-    _type = "square";
+    _type = "rect";
 
     _wavelength = 55;
   }
@@ -121,9 +121,6 @@ class FloatGrayscaleBrush {
 
   void draw(int x, int y) {
     switch (_type) {
-      case "square":
-        brush.squareBrush(x, y);
-        break;
       case "rect":
         brush.rectBrush(x, y);
         break;
@@ -146,16 +143,6 @@ class FloatGrayscaleBrush {
         brush.waveFalloffBrush(x, y, _wavelength);
         break;
       default:
-    }
-  }
-
-  void squareBrush(int targetX, int targetY) {
-    for (int x = targetX - _size; x <= targetX + _size; x++) {
-      if (x < 0 || x >= _imageWidth) continue;
-      for (int y = targetY - _size; y <= targetY + _size; y++) {
-        if (y < 0 || y >= _imageWidth) continue;
-        _image.setValue(x, y, _image.getValue(x, y) + 0.5 * _value);
-      }
     }
   }
 

@@ -96,14 +96,13 @@ void setupUi() {
     .setColorLabel(color(255))
     .setSpacingColumn(150)
     .setItemsPerRow(2)
-    .addItem("square", 0)
-    .addItem("rect", 1)
-    .addItem("squareFalloff", 2)
-    .addItem("circle", 3)
-    .addItem("circleFalloff", 4)
-    .addItem("voronoi", 5)
-    .addItem("wave", 6)
-    .addItem("waveFalloff", 7)
+    .addItem("rect", 0)
+    .addItem("squareFalloff", 1)
+    .addItem("circle", 2)
+    .addItem("circleFalloff", 3)
+    .addItem("voronoi", 4)
+    .addItem("wave", 5)
+    .addItem("waveFalloff", 6)
     .activate(7);
   currY += 100;
 
@@ -115,6 +114,20 @@ void setupUi() {
   currY += 30;
 
   cp5.addSlider("brushSizeSlider")
+    .setPosition(currX, currY)
+    .setSize(240, 20)
+    .setRange(1, 500)
+    .setValue(150);
+  currY += 30;
+
+  cp5.addSlider("brushWidthSlider")
+    .setPosition(currX, currY)
+    .setSize(240, 20)
+    .setRange(1, 500)
+    .setValue(150);
+  currY += 30;
+
+  cp5.addSlider("brushHeightSlider")
     .setPosition(currX, currY)
     .setSize(240, 20)
     .setRange(1, 500)
@@ -282,27 +295,24 @@ void controlEvent(ControlEvent event) {
     println("Brush: " + int(event.getValue()));
     switch (int(event.getValue())) {
       case 0:
-        brush.type("square");
-        break;
-      case 1:
         brush.type("rect");
         break;
-      case 2:
+      case 1:
         brush.type("squareFalloff");
         break;
-      case 3:
+      case 2:
         brush.type("circle");
         break;
-      case 4:
+      case 3:
         brush.type("circleFalloff");
         break;
-      case 5:
+      case 4:
         brush.type("voronoi");
         break;
-      case 6:
+      case 5:
         brush.type("wave");
         break;
-      case 7:
+      case 6:
         brush.type("waveFalloff");
         break;
       default:
@@ -310,7 +320,16 @@ void controlEvent(ControlEvent event) {
   } else if (event.isFrom(cp5.getController("brushValueSlider"))) {
     brush.value(event.getValue());
   } else if (event.isFrom(cp5.getController("brushSizeSlider"))) {
-    brush.size(floor(event.getValue()));
+    int v = floor(event.getValue());
+    brush.size(v);
+    cp5.getController("brushWidthSlider").setValue(v);
+    cp5.getController("brushHeightSlider").setValue(v);
+    brush.width(v);
+    brush.height(v);
+  } else if (event.isFrom(cp5.getController("brushWidthSlider"))) {
+    brush.width(floor(event.getValue()));
+  } else if (event.isFrom(cp5.getController("brushHeightSlider"))) {
+    brush.height(floor(event.getValue()));
   } else if (event.isFrom(cp5.getController("brushWavelengthSlider"))) {
     brush.wavelength(event.getValue());
   }
