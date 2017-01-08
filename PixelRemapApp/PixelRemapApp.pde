@@ -97,7 +97,7 @@ void setupUi() {
     .setSpacingColumn(150)
     .setItemsPerRow(2)
     .addItem("rect", 0)
-    .addItem("squareFalloff", 1)
+    .addItem("rectFalloff", 1)
     .addItem("circle", 2)
     .addItem("circleFalloff", 3)
     .addItem("voronoi", 4)
@@ -298,7 +298,7 @@ void controlEvent(ControlEvent event) {
         brush.type("rect");
         break;
       case 1:
-        brush.type("squareFalloff");
+        brush.type("rectFalloff");
         break;
       case 2:
         brush.type("circle");

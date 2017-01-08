@@ -124,8 +124,8 @@ class FloatGrayscaleBrush {
       case "rect":
         brush.rectBrush(x, y);
         break;
-      case "squareFalloff":
-        brush.squareFalloffBrush(x, y);
+      case "rectFalloff":
+        brush.rectFalloffBrush(x, y);
         break;
       case "circle":
         brush.circleBrush(x, y);
@@ -159,15 +159,18 @@ class FloatGrayscaleBrush {
     }
   }
 
-  void squareFalloffBrush(int targetX, int targetY) {
-    for (int x = targetX - _size; x <= targetX + _size; x++) {
+  void rectFalloffBrush(int targetX, int targetY) {
+    int halfWidth = floor(_width/2);
+    int halfHeight = floor(_height/2);
+
+    for (int x = targetX - halfWidth; x <= targetX + halfWidth; x++) {
       if (x < 0 || x >= _imageWidth) continue;
-      for (int y = targetY - _size; y <= targetY + _size; y++) {
+      for (int y = targetY - halfHeight; y <= targetY + halfHeight; y++) {
         if (y < 0 || y >= _imageHeight) continue;
         float dx = abs(x - targetX);
         float dy = abs(y - targetY);
 
-        float factor = max(dx, dy) / _size;
+        float factor = max(dx / halfWidth, dy / halfHeight);
         factor = getFalloff(factor);
         factor = constrain(factor, 0, 1);
 
