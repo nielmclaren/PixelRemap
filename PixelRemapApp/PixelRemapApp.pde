@@ -98,7 +98,7 @@ void setupUi() {
     .setItemsPerRow(2)
     .addItem("rect", 0)
     .addItem("rectFalloff", 1)
-    .addItem("circle", 2)
+    .addItem("ellipse", 2)
     .addItem("circleFalloff", 3)
     .addItem("voronoi", 4)
     .addItem("wave", 5)
@@ -301,7 +301,7 @@ void controlEvent(ControlEvent event) {
         brush.type("rectFalloff");
         break;
       case 2:
-        brush.type("circle");
+        brush.type("ellipse");
         break;
       case 3:
         brush.type("circleFalloff");

@@ -127,8 +127,8 @@ class FloatGrayscaleBrush {
       case "rectFalloff":
         brush.rectFalloffBrush(x, y);
         break;
-      case "circle":
-        brush.circleBrush(x, y);
+      case "ellipse":
+        brush.ellipseBrush(x, y);
         break;
       case "circleFalloff":
         brush.circleFalloffBrush(x, y);
@@ -180,14 +180,20 @@ class FloatGrayscaleBrush {
     }
   }
 
-  void circleBrush(int targetX, int targetY) {
-    for (int x = targetX - _size; x <= targetX + _size; x++) {
+  void ellipseBrush(int targetX, int targetY) {
+    int halfWidth = floor(_width/2);
+    int halfHeight = floor(_height/2);
+
+    float wSq = halfWidth * halfWidth;
+    float hSq = halfHeight * halfHeight;
+
+    for (int x = targetX - halfWidth; x <= targetX + halfWidth; x++) {
       if (x < 0 || x >= _imageWidth) continue;
-      for (int y = targetY - _size; y <= targetY + _size; y++) {
+      for (int y = targetY - halfHeight; y <= targetY + halfHeight; y++) {
         if (y < 0 || y >= _imageHeight) continue;
         float dx = x - targetX;
         float dy = y - targetY;
-        if (dx * dx  +  dy * dy > _size * _size) continue;
+        if (dx * dx / wSq  +  dy * dy / hSq > 1) continue;
         // FIXME: Factor out blend mode.
         _image.setValue(x, y, _image.getValue(x, y) + 0.5 * _value);
       }
