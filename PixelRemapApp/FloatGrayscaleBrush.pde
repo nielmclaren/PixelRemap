@@ -4,7 +4,6 @@ class FloatGrayscaleBrush {
   int _imageWidth;
   int _imageHeight;
 
-  int _size;
   int _width;
   int _height;
 
@@ -13,16 +12,23 @@ class FloatGrayscaleBrush {
   int _prevStepX;
   int _prevStepY;
 
-  String _type;
+  int _type;
 
   float _waveCount;
+
+  public final int TYPE_RECT = 0;
+  public final int TYPE_RECT_FALLOFF = 1;
+  public final int TYPE_ELLIPSE = 2;
+  public final int TYPE_ELLIPSE_FALLOFF = 3;
+  public final int TYPE_VORONOI = 4;
+  public final int TYPE_WAVE = 5;
+  public final int TYPE_WAVE_FALLOFF = 6;
 
   FloatGrayscaleBrush(FloatGrayscaleImage image, int w, int h) {
     _image = image;
     _imageWidth = w;
     _imageHeight = h;
 
-    _size = 10;
     _width = 50;
     _height = 30;
 
@@ -31,18 +37,9 @@ class FloatGrayscaleBrush {
     _prevStepX = 0;
     _prevStepY = 0;
 
-    _type = "rect";
+    _type = TYPE_RECT;
 
     _waveCount = 4;
-  }
-
-  int size() {
-    return _size;
-  }
-
-  FloatGrayscaleBrush size(int v) {
-    _size = v;
-    return this;
   }
 
   int width() {
@@ -101,11 +98,11 @@ class FloatGrayscaleBrush {
     _image.setPixel(x, y, v);
   }
 
-  String type() {
+  int type() {
     return _type;
   }
 
-  FloatGrayscaleBrush type(String v) {
+  FloatGrayscaleBrush type(int v) {
     _type = v;
     return this;
   }
@@ -121,28 +118,29 @@ class FloatGrayscaleBrush {
 
   void draw(int x, int y) {
     switch (_type) {
-      case "rect":
+      case TYPE_RECT:
         brush.rectBrush(x, y);
         break;
-      case "rectFalloff":
+      case TYPE_RECT_FALLOFF:
         brush.rectFalloffBrush(x, y);
         break;
-      case "ellipse":
+      case TYPE_ELLIPSE:
         brush.ellipseBrush(x, y);
         break;
-      case "ellipseFalloff":
+      case TYPE_ELLIPSE_FALLOFF:
         brush.ellipseFalloffBrush(x, y);
         break;
-      case "voronoi":
+      case TYPE_VORONOI:
         brush.voronoiBrush(x, y);
         break;
-      case "wave":
+      case TYPE_WAVE:
         brush.waveBrush(x, y);
         break;
-      case "waveFalloff":
+      case TYPE_WAVE_FALLOFF:
         brush.waveFalloffBrush(x, y);
         break;
       default:
+        println("Unexpected brush type: " + _type);
     }
   }
 
@@ -152,19 +150,21 @@ class FloatGrayscaleBrush {
     strokeWeight(2);
 
     switch (_type) {
-      case "rect":
-      case "rectFalloff":
+      case TYPE_RECT:
+      case TYPE_RECT_FALLOFF:
         rectMode(CENTER);
         rect(mouseX, mouseY, _width, _height);
         break;
-      case "ellipse":
-      case "ellipseFalloff":
-      case "voronoi":
-      case "wave":
-      case "waveFalloff":
+      case TYPE_ELLIPSE:
+      case TYPE_ELLIPSE_FALLOFF:
+      case TYPE_VORONOI:
+      case TYPE_WAVE:
+      case TYPE_WAVE_FALLOFF:
         ellipseMode(CENTER);
         ellipse(mouseX, mouseY, _width, _height);
         break;
+      default:
+        println("Unexpected brush type: " + _type);
     }
   }
 

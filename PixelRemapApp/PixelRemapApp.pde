@@ -53,10 +53,10 @@ void setup() {
 
 void setupBrush() {
   brush = new FloatGrayscaleBrush(deepImage, imageWidth, imageHeight)
-    .size(300)
     .value(32)
-    .step(15)
-    .type("waveFalloff");
+    .step(15);
+  brush
+    .type(brush.TYPE_WAVE_FALLOFF);
 }
 
 void setupUi() {
@@ -82,7 +82,6 @@ void setupUi() {
     .setPosition(currX, currY)
     .setSize(240, 20)
     .setRange(1, 50)
-    .setValue(1)
     .setNumberOfTickMarks(50)
     .snapToTickMarks(true)
     .showTickMarks(false);
@@ -96,42 +95,38 @@ void setupUi() {
     .setColorLabel(color(255))
     .setSpacingColumn(150)
     .setItemsPerRow(2)
-    .addItem("rect", 0)
-    .addItem("rectFalloff", 1)
-    .addItem("ellipse", 2)
-    .addItem("ellipseFalloff", 3)
-    .addItem("voronoi", 4)
-    .addItem("wave", 5)
-    .addItem("waveFalloff", 6)
+    .addItem("rect", brush.TYPE_RECT)
+    .addItem("rectFalloff", brush.TYPE_RECT_FALLOFF)
+    .addItem("ellipse", brush.TYPE_ELLIPSE)
+    .addItem("ellipseFalloff", brush.TYPE_ELLIPSE_FALLOFF)
+    .addItem("voronoi", brush.TYPE_VORONOI)
+    .addItem("wave", brush.TYPE_WAVE)
+    .addItem("waveFalloff", brush.TYPE_WAVE_FALLOFF)
     .activate(7);
   currY += 100;
 
   cp5.addSlider("brushValueSlider")
     .setPosition(currX, currY)
     .setSize(240, 20)
-    .setRange(0, 255)
-    .setValue(32);
+    .setRange(0, 255);
   currY += 30;
 
   cp5.addSlider("brushSizeSlider")
     .setPosition(currX, currY)
     .setSize(240, 20)
-    .setRange(1, 1000)
-    .setValue(150);
+    .setRange(1, 1000);
   currY += 30;
 
   cp5.addSlider("brushWidthSlider")
     .setPosition(currX, currY)
     .setSize(240, 20)
-    .setRange(1, 1000)
-    .setValue(150);
+    .setRange(1, 1000);
   currY += 30;
 
   cp5.addSlider("brushHeightSlider")
     .setPosition(currX, currY)
     .setSize(240, 20)
-    .setRange(1, 1000)
-    .setValue(150);
+    .setRange(1, 1000);
   currY += 30;
 
   cp5.addSlider("brushWaveCountSlider")
@@ -140,8 +135,7 @@ void setupUi() {
     .setRange(0.0, 20.0)
     .setNumberOfTickMarks(20 * 4 + 1)
     .showTickMarks(false)
-    .snapToTickMarks(true)
-    .setValue(5);
+    .snapToTickMarks(true);
   currY += 30;
 }
 
@@ -150,6 +144,7 @@ void setupPalette() {
     .repeatCount(1)
     .isMirrored(false)
     .isReversed(false)
+    .addFilename("cavegrad.png")
     .addFilename("halograd.png")
     .addFilename("mirage_sunset.png")
     .addFilename("neon.png")
@@ -238,13 +233,38 @@ void reset() {
 
 void drawThing() {
   int count = 20;
-  brush.type("rectFalloff")
+  brush.type(brush.TYPE_RECT_FALLOFF)
     .value(128)
     .width(imageWidth / (count - 1))
     .height(imageHeight);
 
   for (int i = 0; i < count; i++) {
     brush.draw(i * imageWidth / (count - 1), imageHeight/2);
+  }
+
+  brush.type(brush.TYPE_WAVE_FALLOFF)
+    .value(32)
+    .width(300)
+    .height(300)
+    .waveCount(10);
+  brushChanged();
+}
+
+void brushChanged() {
+  if (cp5.getController("brushType") != null) {
+    cp5.getController("brushType").setValue(brush.type());
+  }
+  if (cp5.getController("brushSizeSlider") != null) {
+    cp5.getController("brushSizeSlider").setValue(brush.width());
+  }
+  if (cp5.getController("brushWidthSlider") != null) {
+    cp5.getController("brushWidthSlider").setValue(brush.width());
+  }
+  if (cp5.getController("brushHeightSlider") != null) {
+    cp5.getController("brushHeightSlider").setValue(brush.height());
+  }
+  if (cp5.getController("brushWaveCountSlider") != null) {
+    cp5.getController("brushWaveCountSlider").setValue(brush.waveCount());
   }
 }
 
@@ -302,35 +322,11 @@ void controlEvent(ControlEvent event) {
   if(event.isFrom(brushTypeRadio)) {
     // FIXME: Get the radio button label value instead of switching.
     println("Brush: " + int(event.getValue()));
-    switch (int(event.getValue())) {
-      case 0:
-        brush.type("rect");
-        break;
-      case 1:
-        brush.type("rectFalloff");
-        break;
-      case 2:
-        brush.type("ellipse");
-        break;
-      case 3:
-        brush.type("ellipseFalloff");
-        break;
-      case 4:
-        brush.type("voronoi");
-        break;
-      case 5:
-        brush.type("wave");
-        break;
-      case 6:
-        brush.type("waveFalloff");
-        break;
-      default:
-    }
+    brush.type(int(event.getValue()));
   } else if (event.isFrom(cp5.getController("brushValueSlider"))) {
     brush.value(event.getValue());
   } else if (event.isFrom(cp5.getController("brushSizeSlider"))) {
     int v = floor(event.getValue());
-    brush.size(v);
     if (cp5.getController("brushWidthSlider") != null) {
       cp5.getController("brushWidthSlider").setValue(v);
     }
