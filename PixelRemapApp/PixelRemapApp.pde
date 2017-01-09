@@ -134,11 +134,14 @@ void setupUi() {
     .setValue(150);
   currY += 30;
 
-  cp5.addSlider("brushWavelengthSlider")
+  cp5.addSlider("brushWaveCountSlider")
     .setPosition(currX, currY)
     .setSize(240, 20)
-    .setRange(1, 250)
-    .setValue(50);
+    .setRange(0.0, 20.0)
+    .setNumberOfTickMarks(20 * 4 + 1)
+    .showTickMarks(false)
+    .snapToTickMarks(true)
+    .setValue(5);
   currY += 30;
 }
 
@@ -334,8 +337,8 @@ void controlEvent(ControlEvent event) {
     brush.width(floor(event.getValue()));
   } else if (event.isFrom(cp5.getController("brushHeightSlider"))) {
     brush.height(floor(event.getValue()));
-  } else if (event.isFrom(cp5.getController("brushWavelengthSlider"))) {
-    brush.wavelength(event.getValue());
+  } else if (event.isFrom(cp5.getController("brushWaveCountSlider"))) {
+    brush.waveCount(event.getValue());
   }
 }
 
