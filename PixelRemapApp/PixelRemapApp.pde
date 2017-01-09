@@ -116,21 +116,21 @@ void setupUi() {
   cp5.addSlider("brushSizeSlider")
     .setPosition(currX, currY)
     .setSize(240, 20)
-    .setRange(1, 500)
+    .setRange(1, 1000)
     .setValue(150);
   currY += 30;
 
   cp5.addSlider("brushWidthSlider")
     .setPosition(currX, currY)
     .setSize(240, 20)
-    .setRange(1, 500)
+    .setRange(1, 1000)
     .setValue(150);
   currY += 30;
 
   cp5.addSlider("brushHeightSlider")
     .setPosition(currX, currY)
     .setSize(240, 20)
-    .setRange(1, 500)
+    .setRange(1, 1000)
     .setValue(150);
   currY += 30;
 
@@ -150,6 +150,7 @@ void setupPalette() {
     .repeatCount(1)
     .isMirrored(false)
     .isReversed(false)
+    .addFilename("halograd.png")
     .addFilename("mirage_sunset.png")
     .addFilename("neon.png")
     .addFilename("powerlines_palette01.png")
@@ -231,6 +232,20 @@ void reset() {
   inputImg.loadPixels();
 
   deepImage.setImage(inputImg);
+
+  drawThing();
+}
+
+void drawThing() {
+  int count = 20;
+  brush.type("rectFalloff")
+    .value(128)
+    .width(imageWidth / (count - 1))
+    .height(imageHeight);
+
+  for (int i = 0; i < count; i++) {
+    brush.draw(i * imageWidth / (count - 1), imageHeight/2);
+  }
 }
 
 void keyReleased() {
