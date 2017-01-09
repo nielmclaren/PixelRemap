@@ -146,6 +146,28 @@ class FloatGrayscaleBrush {
     }
   }
 
+  void drawOutline(int x, int y) {
+    noFill();
+    stroke(128);
+    strokeWeight(2);
+
+    switch (_type) {
+      case "rect":
+      case "rectFalloff":
+        rectMode(CENTER);
+        rect(mouseX, mouseY, _width, _height);
+        break;
+      case "ellipse":
+      case "ellipseFalloff":
+      case "voronoi":
+      case "wave":
+      case "waveFalloff":
+        ellipseMode(CENTER);
+        ellipse(mouseX, mouseY, _width, _height);
+        break;
+    }
+  }
+
   void rectBrush(int targetX, int targetY) {
     int halfWidth = floor(_width/2);
     int halfHeight = floor(_height/2);

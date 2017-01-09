@@ -183,17 +183,8 @@ void draw() {
   paletteDisplay.draw(g);
 
   if (mouseHitTestImage()) {
-    drawBrushSize();
+    brush.drawOutline(mouseX, mouseY);
   }
-}
-
-void drawBrushSize() {
-  noFill();
-  stroke(128);
-  strokeWeight(2);
-
-  ellipseMode(RADIUS);
-  ellipse(mouseX, mouseY, brush.size(), brush.size());
 }
 
 void updateRepeatCount() {
