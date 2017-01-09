@@ -99,7 +99,7 @@ void setupUi() {
     .addItem("rect", 0)
     .addItem("rectFalloff", 1)
     .addItem("ellipse", 2)
-    .addItem("circleFalloff", 3)
+    .addItem("ellipseFalloff", 3)
     .addItem("voronoi", 4)
     .addItem("wave", 5)
     .addItem("waveFalloff", 6)
@@ -304,7 +304,7 @@ void controlEvent(ControlEvent event) {
         brush.type("ellipse");
         break;
       case 3:
-        brush.type("circleFalloff");
+        brush.type("ellipseFalloff");
         break;
       case 4:
         brush.type("voronoi");
@@ -322,8 +322,12 @@ void controlEvent(ControlEvent event) {
   } else if (event.isFrom(cp5.getController("brushSizeSlider"))) {
     int v = floor(event.getValue());
     brush.size(v);
-    cp5.getController("brushWidthSlider").setValue(v);
-    cp5.getController("brushHeightSlider").setValue(v);
+    if (cp5.getController("brushWidthSlider") != null) {
+      cp5.getController("brushWidthSlider").setValue(v);
+    }
+    if (cp5.getController("brushHeightSlider") != null) {
+      cp5.getController("brushHeightSlider").setValue(v);
+    }
     brush.width(v);
     brush.height(v);
   } else if (event.isFrom(cp5.getController("brushWidthSlider"))) {

@@ -130,8 +130,8 @@ class FloatGrayscaleBrush {
       case "ellipse":
         brush.ellipseBrush(x, y);
         break;
-      case "circleFalloff":
-        brush.circleFalloffBrush(x, y);
+      case "ellipseFalloff":
+        brush.ellipseFalloffBrush(x, y);
         break;
       case "voronoi":
         brush.voronoiBrush(x, y);
@@ -200,21 +200,29 @@ class FloatGrayscaleBrush {
     }
   }
 
-  void circleFalloffBrush(int targetX, int targetY) {
-    int brushSizeSq = _size * _size;
+  void ellipseFalloffBrush(int targetX, int targetY) {
+    int halfWidth = floor(_width/2);
+    int halfHeight = floor(_height/2);
 
-    for (int x = targetX - _size; x <= targetX + _size; x++) {
+    float wSq = halfWidth * halfWidth;
+    float hSq = halfHeight * halfHeight;
+
+    for (int x = targetX - halfWidth; x <= targetX + halfWidth; x++) {
       if (x < 0 || x >= _imageWidth) continue;
-      for (int y = targetY - _size; y <= targetY + _size; y++) {
+      for (int y = targetY - halfHeight; y <= targetY + halfHeight; y++) {
         if (y < 0 || y >= _imageHeight) continue;
         float dx = x - targetX;
         float dy = y - targetY;
-        float dSq = dx * dx + dy * dy;
-        if (dSq > brushSizeSq) continue;
+        float dSq = dx * dx / wSq + dy * dy / hSq;
+        if (dSq > 1) continue;
 
-        float factor = sqrt(dSq) / _size;
+        float factor = sqrt(dSq);
         factor = getFalloff(factor);
         factor = constrain(factor, 0, 1);
+
+        if (x == 100 && y == 100) {
+          println(dSq, factor);
+        }
 
         float currentValue = _image.getValue(x, y);
         _image.setValue(x, y, constrain(currentValue + factor * _value, 0, 255));
@@ -223,13 +231,19 @@ class FloatGrayscaleBrush {
   }
 
   void voronoiBrush(int targetX, int targetY) {
-    for (int x = targetX - _size; x <= targetX + _size; x++) {
+    int halfWidth = floor(_width/2);
+    int halfHeight = floor(_height/2);
+
+    float wSq = halfWidth * halfWidth;
+    float hSq = halfHeight * halfHeight;
+
+    for (int x = targetX - halfWidth; x <= targetX + halfWidth; x++) {
       if (x < 0 || x >= _imageWidth) continue;
-      for (int y = targetY - _size; y <= targetY + _size; y++) {
+      for (int y = targetY - halfHeight; y <= targetY + halfHeight; y++) {
         if (y < 0 || y >= _imageHeight) continue;
         float dx = x - targetX;
         float dy = y - targetY;
-        float v = constrain(map(dx * dx + dy * dy, 0, _size * _size, _value, 0), 0, 255);
+        float v = constrain(map(dx * dx / wSq + dy * dy / hSq, 0, 1, _value, 0), 0, 255);
 
         float currentValue = _image.getValue(x, y);
         _image.setValue(x, y, max(currentValue, v));
