@@ -232,14 +232,22 @@ void reset() {
 }
 
 void drawThing() {
-  int count = 20;
+  int count = 60;
   brush.type(brush.TYPE_RECT_FALLOFF)
-    .value(128)
+    .value(160)
     .width(imageWidth / (count - 1))
     .height(imageHeight);
 
   for (int i = 0; i < count; i++) {
     brush.draw(i * imageWidth / (count - 1), imageHeight/2);
+  }
+
+  brush.type(brush.TYPE_RECT_FALLOFF)
+    .width(imageWidth)
+    .height(imageHeight / (count - 1));
+
+  for (int i = 0; i < count; i++) {
+    brush.draw(imageWidth/2, i * imageHeight / (count - 1));
   }
 
   brush.type(brush.TYPE_WAVE_FALLOFF)
