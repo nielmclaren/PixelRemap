@@ -44,19 +44,26 @@ void setup() {
   outputImg = createGraphics(imageWidth, imageHeight, P2D);
   deepImage = new FloatGrayscaleImage(imageWidth, imageHeight);
 
-  setupBrush();
+  // Need an instance to get the brush constants.
+  // FIXME: Use static constants somehow.
+  brush = new FloatGrayscaleBrush(deepImage, imageWidth, imageHeight);
+
   setupUi();
+  setupBrush();
   setupPalette();
+  brushChanged();
 
   reset();
 }
 
 void setupBrush() {
   brush = new FloatGrayscaleBrush(deepImage, imageWidth, imageHeight)
+    .type(brush.TYPE_WAVE_FALLOFF)
     .value(32)
-    .step(15);
-  brush
-    .type(brush.TYPE_WAVE_FALLOFF);
+    .step(15)
+    .width(300)
+    .height(300)
+    .waveCount(10);
 }
 
 void setupUi() {
@@ -75,19 +82,21 @@ void setupUi() {
   cp5.addSlider("paletteOffsetSlider")
     .setPosition(currX, currY)
     .setSize(240, 20)
-    .setRange(0, 1);
+    .setRange(0, 1)
+    .setValue(0);
   currY += 30;
 
   cp5.addSlider("paletteRepeatSlider")
     .setPosition(currX, currY)
     .setSize(240, 20)
     .setRange(1, 50)
+    .setValue(1)
     .setNumberOfTickMarks(50)
     .snapToTickMarks(true)
     .showTickMarks(false);
   currY += 30;
 
-  brushTypeRadio = cp5.addRadioButton("brushType")
+  brushTypeRadio = cp5.addRadioButton("brushTypeRadio")
     .setPosition(currX, currY)
     .setSize(20,20)
     .setColorForeground(color(120))
@@ -114,19 +123,28 @@ void setupUi() {
   cp5.addSlider("brushSizeSlider")
     .setPosition(currX, currY)
     .setSize(240, 20)
-    .setRange(1, 1000);
+    .setRange(1, 1000)
+    .setNumberOfTickMarks(1000)
+    .snapToTickMarks(true)
+    .showTickMarks(false);
   currY += 30;
 
   cp5.addSlider("brushWidthSlider")
     .setPosition(currX, currY)
     .setSize(240, 20)
-    .setRange(1, 1000);
+    .setRange(1, 1000)
+    .setNumberOfTickMarks(1000)
+    .snapToTickMarks(true)
+    .showTickMarks(false);
   currY += 30;
 
   cp5.addSlider("brushHeightSlider")
     .setPosition(currX, currY)
     .setSize(240, 20)
-    .setRange(1, 1000);
+    .setRange(1, 1000)
+    .setNumberOfTickMarks(1000)
+    .snapToTickMarks(true)
+    .showTickMarks(false);
   currY += 30;
 
   cp5.addSlider("brushWaveCountSlider")
@@ -227,8 +245,6 @@ void reset() {
   inputImg.loadPixels();
 
   deepImage.setImage(inputImg);
-
-  drawThing();
 }
 
 void drawThing() {
@@ -250,30 +266,23 @@ void drawThing() {
     brush.draw(imageWidth/2, i * imageHeight / (count - 1));
   }
 
-  brush.type(brush.TYPE_WAVE_FALLOFF)
-    .value(32)
-    .width(300)
-    .height(300)
-    .waveCount(10);
-  brushChanged();
 }
 
 void brushChanged() {
-  if (cp5.getController("brushType") != null) {
-    cp5.getController("brushType").setValue(brush.type());
+  if (cp5 == null || brush == null) {
+    return;
   }
-  if (cp5.getController("brushSizeSlider") != null) {
-    cp5.getController("brushSizeSlider").setValue(brush.width());
+
+  brushTypeRadio.deactivateAll();
+  if (brush.type() >= 0) {
+    brushTypeRadio.activate(brush.type());
   }
-  if (cp5.getController("brushWidthSlider") != null) {
-    cp5.getController("brushWidthSlider").setValue(brush.width());
-  }
-  if (cp5.getController("brushHeightSlider") != null) {
-    cp5.getController("brushHeightSlider").setValue(brush.height());
-  }
-  if (cp5.getController("brushWaveCountSlider") != null) {
-    cp5.getController("brushWaveCountSlider").setValue(brush.waveCount());
-  }
+
+  cp5.getController("brushValueSlider").setValue(brush.value());
+  cp5.getController("brushSizeSlider").setValue(brush.width());
+  cp5.getController("brushWidthSlider").setValue(brush.width());
+  cp5.getController("brushHeightSlider").setValue(brush.height());
+  cp5.getController("brushWaveCountSlider").setValue(brush.waveCount());
 }
 
 void keyReleased() {
@@ -328,8 +337,6 @@ void mouseReleased() {
 
 void controlEvent(ControlEvent event) {
   if(event.isFrom(brushTypeRadio)) {
-    // FIXME: Get the radio button label value instead of switching.
-    println("Brush: " + int(event.getValue()));
     brush.type(int(event.getValue()));
   } else if (event.isFrom(cp5.getController("brushValueSlider"))) {
     brush.value(event.getValue());
