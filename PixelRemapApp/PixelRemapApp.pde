@@ -313,7 +313,7 @@ void keyReleased() {
       showInputImage = !showInputImage;
       break;
     case 'r':
-      save(fileNamer.next());
+      saveRender();
       break;
     case 'm':
       palette.toggleMirrored();
@@ -380,4 +380,23 @@ void drawBrush(int x, int y) {
 boolean mouseHitTestImage() {
   return mouseX > imageX && mouseX < imageX + imageWidth
       && mouseY > imageY && mouseY < imageY + imageHeight;
+}
+
+void saveRender() {
+  String filename = fileNamer.next();
+  save(filename);
+
+  String rawFilename = getRawFilename(filename);
+  PImage inputImage = deepImage.getImageRef();
+  inputImage.save(savePath(rawFilename));
+}
+
+String getRawFilename(String filename) {
+  int index;
+
+  index = filename.lastIndexOf('.');
+  String pathAndBaseName = filename.substring(0, index);
+  String extension = filename.substring(index);
+
+  return pathAndBaseName + "raw" + extension;
 }
