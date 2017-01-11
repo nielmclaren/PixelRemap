@@ -15,12 +15,12 @@ Palette palette;
 PaletteDisplay paletteDisplay;
 RadioButton brushTypeRadio;
 
-PGraphics inputImg, outputImg;
+PGraphics inputImage, outputImage;
 FloatGrayscaleImage deepImage;
 
 FloatGrayscaleBrush brush;
 
-boolean showInputImg;
+boolean showInputImage;
 boolean isDragging;
 
 FileNamer fileNamer;
@@ -31,17 +31,17 @@ void setup() {
 
   inputFilename = "input.png";
 
-  PImage inputTempImg = loadImage(inputFilename);
-  imageWidth = inputTempImg.width;
-  imageHeight = inputTempImg.height;
+  PImage inputTempImage = loadImage(inputFilename);
+  imageWidth = inputTempImage.width;
+  imageHeight = inputTempImage.height;
 
-  showInputImg = false;
+  showInputImage = false;
   isDragging = false;
 
   fileNamer = new FileNamer("output/export", "png");
 
-  inputImg = createGraphics(imageWidth, imageHeight, P2D);
-  outputImg = createGraphics(imageWidth, imageHeight, P2D);
+  inputImage = createGraphics(imageWidth, imageHeight, P2D);
+  outputImage = createGraphics(imageWidth, imageHeight, P2D);
   deepImage = new FloatGrayscaleImage(imageWidth, imageHeight);
 
   // Need an instance to get the brush constants.
@@ -185,13 +185,13 @@ void draw() {
 
   background(0);
 
-  if (showInputImg) {
+  if (showInputImage) {
     PImage inputImage = deepImage.getImageRef();
     image(inputImage, imageX, imageY, imageWidth, imageHeight);
   }
   else {
     updateOutputImage();
-    image(outputImg, imageX, imageY, imageWidth, imageHeight);
+    image(outputImage, imageX, imageY, imageWidth, imageHeight);
   }
 
   paletteDisplay.draw(g);
@@ -210,13 +210,13 @@ void updateRepeatCount() {
 }
 
 void updateOutputImage() {
-  outputImg.loadPixels();
-  for (int y = 0; y < outputImg.height; y++) {
-    for (int x = 0; x < outputImg.width; x++) {
-      outputImg.pixels[(outputImg.height - y - 1) * outputImg.width + x] = translateValue(deepImage.getValue(x, y));
+  outputImage.loadPixels();
+  for (int y = 0; y < outputImage.height; y++) {
+    for (int x = 0; x < outputImage.width; x++) {
+      outputImage.pixels[(outputImage.height - y - 1) * outputImage.width + x] = translateValue(deepImage.getValue(x, y));
     }
   }
-  outputImg.updatePixels();
+  outputImage.updatePixels();
 }
 
 color translateValue(float v) {
@@ -236,15 +236,15 @@ void paletteChanged() {
 }
 
 void reset() {
-  PImage inputTempImg = loadImage(inputFilename);
+  PImage inputTempImage = loadImage(inputFilename);
 
-  inputImg.beginDraw();
-  inputImg.image(inputTempImg, 0, 0);
-  inputImg.endDraw();
+  inputImage.beginDraw();
+  inputImage.image(inputTempImage, 0, 0);
+  inputImage.endDraw();
 
-  inputImg.loadPixels();
+  inputImage.loadPixels();
 
-  deepImage.setImage(inputImg);
+  deepImage.setImage(inputImage);
 }
 
 void drawThing() {
@@ -296,7 +296,7 @@ void keyReleased() {
       paletteChanged();
       break;
     case 't':
-      showInputImg = !showInputImg;
+      showInputImage = !showInputImage;
       break;
     case 'r':
       save(fileNamer.next());
