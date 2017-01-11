@@ -17,10 +17,12 @@ RadioButton brushTypeRadio;
 
 PGraphics inputImage, outputImage;
 FloatGrayscaleImage deepImage;
+PImage overlayImage;
 
 FloatGrayscaleBrush brush;
 
 boolean showInputImage;
+boolean showOverlayImage;
 boolean isDragging;
 
 FileNamer fileNamer;
@@ -36,6 +38,7 @@ void setup() {
   imageHeight = inputTempImage.height;
 
   showInputImage = false;
+  showOverlayImage = true;
   isDragging = false;
 
   fileNamer = new FileNamer("output/export", "png");
@@ -43,6 +46,8 @@ void setup() {
   inputImage = createGraphics(imageWidth, imageHeight, P2D);
   outputImage = createGraphics(imageWidth, imageHeight, P2D);
   deepImage = new FloatGrayscaleImage(imageWidth, imageHeight);
+
+  overlayImage = loadImage("overlay.png");
 
   // Need an instance to get the brush constants.
   // FIXME: Use static constants somehow.
@@ -194,6 +199,12 @@ void draw() {
     image(outputImage, imageX, imageY, imageWidth, imageHeight);
   }
 
+  if (showOverlayImage) {
+    tint(255, 128);
+    image(overlayImage, imageX,imageY, imageWidth, imageHeight);
+    tint(255);
+  }
+
   paletteDisplay.draw(g);
 
   if (mouseHitTestImage()) {
@@ -290,6 +301,9 @@ void keyReleased() {
     case 'e':
     case ' ':
       reset();
+      break;
+    case 'o':
+      showOverlayImage = !showOverlayImage;
       break;
     case 'p':
       palette.loadNext();
