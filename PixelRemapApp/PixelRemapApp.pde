@@ -162,21 +162,13 @@ void setupPalette() {
     .repeatCount(1)
     .isMirrored(false)
     .isReversed(false)
+    .addFilename("doraemon_palette.png")
     .addFilename("cavegrad.png")
     .addFilename("halograd.png")
     .addFilename("mirage_sunset.png")
     .addFilename("neon.png")
-    .addFilename("powerlines_palette01.png")
-    .addFilename("vaporwave.png")
     .addFilename("stripe02.png")
-    .addFilename("stripe01.png")
-    .addFilename("flake04.png")
-    .addFilename("blacktogradient.png")
-    .addFilename("flake03.png")
-    .addFilename("flake02.png")
-    .addFilename("stripey02.png")
-    .addFilename("flake01.png")
-    .addFilename("blobby.png");
+    .addFilename("flake01.png");
   paletteChanged();
 }
 
