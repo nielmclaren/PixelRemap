@@ -164,6 +164,7 @@ void setupPalette() {
     .repeatCount(1)
     .isMirrored(false)
     .isReversed(false)
+    .addFilename("pinkredgrad.png")
     .addFilename("mirage_sunset_dark.png")
     .addFilename("mirage_sunset.png")
     .addFilename("doraemon_palette.png")
@@ -248,23 +249,18 @@ void reset() {
 }
 
 void drawThing() {
-  brush
-    .width(800)
-    .height(800)
-    .waveCount(14)
-    .value(64.0 / 256.0)
-    .type(brush.TYPE_RECT_WAVE);
+  int strokeCount = 12;
+  for (int i = 0; i < strokeCount; i++) {
+    int size = floor(random(800));
+    brush
+      .width(size)
+      .height(size)
+      .waveCount(floor(size / 40) + 0.5)
+      .value(random(0, 0.5))
+      .type(brush.TYPE_WAVE_FALLOFF);
 
-  drawBrush(400, 400);
-
-  brush
-    .width(750)
-    .height(750)
-    .waveCount(8)
-    .value(128.0 / 256.0)
-    .type(brush.TYPE_WAVE_FALLOFF);
-
-  drawBrush(400, 400);
+    drawBrush(floor(random(imageWidth)), floor(random(imageHeight)));
+  }
 
   palette
     .repeatCount(2)
