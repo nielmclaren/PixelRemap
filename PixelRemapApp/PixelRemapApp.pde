@@ -60,7 +60,7 @@ void setup() {
 void setupBrush() {
   brush = new DeepGrayscaleBrush(deepImage, imageWidth, imageHeight)
     .type(brush.TYPE_WAVE_FALLOFF)
-    .value(32)
+    .value(32.0 / 256.0)
     .step(15)
     .width(300)
     .height(300)
@@ -119,7 +119,7 @@ void setupUi() {
   cp5.addSlider("brushValueSlider")
     .setPosition(currX, currY)
     .setSize(240, 20)
-    .setRange(0, 255);
+    .setRange(0, 1);
   currY += 30;
 
   cp5.addSlider("brushSizeSlider")
@@ -211,7 +211,7 @@ void updateOutputImage(float offset) {
   outputImage.pixels[0] = color(0);
   for (int y = 0; y < outputImage.height; y++) {
     for (int x = 0; x < outputImage.width; x++) {
-      outputImage.pixels[(outputImage.height - y - 1) * outputImage.width + x] = translateValue(deepImage.getValue(x, y), offset);
+      outputImage.pixels[y * outputImage.width + x] = translateValue(deepImage.getFloatValue(x, y), offset);
     }
   }
   outputImage.updatePixels();
@@ -221,7 +221,7 @@ void updateOutputImage(float offset) {
 color translateValue(float v, float offset) {
   color[] colors = palette.getColorsRef();
   int len = colors.length;
-  float value = (v / 256.0 + offset) * len;
+  float value = (v + offset) * len;
   int index = floor(value % len);
   if (index >= len) {
     index--;
@@ -252,7 +252,7 @@ void drawThing() {
     .width(800)
     .height(800)
     .waveCount(14)
-    .value(64)
+    .value(64.0 / 256.0)
     .type(brush.TYPE_RECT_WAVE);
 
   drawBrush(400, 400);
@@ -261,7 +261,7 @@ void drawThing() {
     .width(750)
     .height(750)
     .waveCount(8)
-    .value(128)
+    .value(128.0 / 256.0)
     .type(brush.TYPE_WAVE_FALLOFF);
 
   drawBrush(400, 400);

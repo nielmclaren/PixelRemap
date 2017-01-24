@@ -33,7 +33,7 @@ class DeepGrayscaleBrush {
     _width = 50;
     _height = 30;
 
-    _value = 255;
+    _value = 1;
     _step = 5;
     _prevStepX = 0;
     _prevStepY = 0;
@@ -181,7 +181,7 @@ class DeepGrayscaleBrush {
       if (x < 0 || x >= _imageWidth) continue;
       for (int y = targetY - halfHeight; y <= targetY + halfHeight; y++) {
         if (y < 0 || y >= _imageWidth) continue;
-        _image.setValue(x, y, _image.getValue(x, y) + 0.5 * _value);
+        _image.setFloatValue(x, y, constrain(_image.getFloatValue(x, y) + _value, 0, 1));
       }
     }
   }
@@ -201,8 +201,8 @@ class DeepGrayscaleBrush {
         factor = getFalloff(factor);
         factor = constrain(factor, 0, 1);
 
-        float currentValue = _image.getValue(x, y);
-        _image.setValue(x, y, constrain(currentValue + factor * _value, 0, 255));
+        float currentValue = _image.getFloatValue(x, y);
+        _image.setFloatValue(x, y, constrain(currentValue + factor * _value, 0, 1));
       }
     }
   }
@@ -222,7 +222,7 @@ class DeepGrayscaleBrush {
         float dy = y - targetY;
         if (dx * dx / wSq  +  dy * dy / hSq > 1) continue;
         // FIXME: Factor out blend mode.
-        _image.setValue(x, y, _image.getValue(x, y) + 0.5 * _value);
+        _image.setFloatValue(x, y, _image.getFloatValue(x, y) + _value);
       }
     }
   }
@@ -247,12 +247,8 @@ class DeepGrayscaleBrush {
         factor = getFalloff(factor);
         factor = constrain(factor, 0, 1);
 
-        if (x == 100 && y == 100) {
-          println(dSq, factor);
-        }
-
-        float currentValue = _image.getValue(x, y);
-        _image.setValue(x, y, constrain(currentValue + factor * _value, 0, 255));
+        float currentValue = _image.getFloatValue(x, y);
+        _image.setFloatValue(x, y, constrain(currentValue + factor * _value, 0, 1));
       }
     }
   }
@@ -270,10 +266,10 @@ class DeepGrayscaleBrush {
         if (y < 0 || y >= _imageHeight) continue;
         float dx = x - targetX;
         float dy = y - targetY;
-        float v = constrain(map(dx * dx / wSq + dy * dy / hSq, 0, 1, _value, 0), 0, 255);
+        float v = constrain(map(dx * dx / wSq + dy * dy / hSq, 0, 1, _value, 0), 0, 1);
 
-        float currentValue = _image.getValue(x, y);
-        _image.setValue(x, y, max(currentValue, v));
+        float currentValue = _image.getFloatValue(x, y);
+        _image.setFloatValue(x, y, max(currentValue, v));
       }
     }
   }
@@ -296,8 +292,8 @@ class DeepGrayscaleBrush {
 
         float factor = (cos(d * _waveCount * 2 * PI) + 1) / 2;
 
-        float currentValue = _image.getValue(x, y);
-        _image.setValue(x, y, constrain(currentValue + factor * _value, 0, 255));
+        float currentValue = _image.getFloatValue(x, y);
+        _image.setFloatValue(x, y, constrain(currentValue + factor * _value, 0, 1));
       }
     }
   }
@@ -324,8 +320,8 @@ class DeepGrayscaleBrush {
 
         factor *= (cos(d * _waveCount * 2 * PI) + 1) / 2;
 
-        float currentValue = _image.getValue(x, y);
-        _image.setValue(x, y, constrain(currentValue + factor * _value, 0, 255));
+        float currentValue = _image.getFloatValue(x, y);
+        _image.setFloatValue(x, y, constrain(currentValue + factor * _value, 0, 1));
       }
     }
   }
@@ -340,8 +336,8 @@ class DeepGrayscaleBrush {
       for (int y = targetY - halfHeight; y <= targetY + halfHeight; y++) {
         if (y < 0 || y >= _imageWidth) continue;
         float factor = (cos(x * _waveCount / size * 2 * PI) + 1) / 2;
-        float currentValue = _image.getValue(x, y);
-        _image.setValue(x, y, constrain(currentValue + factor * _value, 0, 255));
+        float currentValue = _image.getFloatValue(x, y);
+        _image.setFloatValue(x, y, constrain(currentValue + factor * _value, 0, 1));
       }
     }
   }
