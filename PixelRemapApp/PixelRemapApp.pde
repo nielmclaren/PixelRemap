@@ -23,7 +23,7 @@ FloatGrayscaleBrush brush;
 boolean showInputImage;
 boolean isDragging;
 
-FileNamer fileNamer;
+FileNamer animationFolderNamer, fileNamer;
 
 void setup() {
   size(1280, 830, P2D);
@@ -38,6 +38,7 @@ void setup() {
   showInputImage = false;
   isDragging = false;
 
+  animationFolderNamer = new FileNamer("output/anim", "/");
   fileNamer = new FileNamer("output/export", "png");
 
   inputImage = createGraphics(imageWidth, imageHeight, P2D);
@@ -111,7 +112,8 @@ void setupUi() {
     .addItem("voronoi", brush.TYPE_VORONOI)
     .addItem("wave", brush.TYPE_WAVE)
     .addItem("waveFalloff", brush.TYPE_WAVE_FALLOFF)
-    .activate(7);
+    .addItem("rectWaveBrush", brush.TYPE_RECT_WAVE);
+  brushTypeRadio.activate(brush.TYPE_WAVE_FALLOFF);
   currY += 100;
 
   cp5.addSlider("brushValueSlider")
@@ -162,10 +164,11 @@ void setupPalette() {
     .repeatCount(1)
     .isMirrored(false)
     .isReversed(false)
+    .addFilename("mirage_sunset_dark.png")
+    .addFilename("mirage_sunset.png")
     .addFilename("doraemon_palette.png")
     .addFilename("cavegrad.png")
     .addFilename("halograd.png")
-    .addFilename("mirage_sunset.png")
     .addFilename("neon.png")
     .addFilename("stripe02.png")
     .addFilename("flake01.png");
@@ -182,7 +185,8 @@ void draw() {
     image(inputImage, imageX, imageY, imageWidth, imageHeight);
   }
   else {
-    updateOutputImage();
+    float offset = cp5.getController("paletteOffsetSlider").getValue();
+    updateOutputImage(offset);
     image(outputImage, imageX, imageY, imageWidth, imageHeight);
   }
 
@@ -201,20 +205,22 @@ void updateRepeatCount() {
   }
 }
 
-void updateOutputImage() {
+void updateOutputImage(float offset) {
+  outputImage.beginDraw();
   outputImage.loadPixels();
+  outputImage.pixels[0] = color(0);
   for (int y = 0; y < outputImage.height; y++) {
     for (int x = 0; x < outputImage.width; x++) {
-      outputImage.pixels[(outputImage.height - y - 1) * outputImage.width + x] = translateValue(deepImage.getValue(x, y));
+      outputImage.pixels[(outputImage.height - y - 1) * outputImage.width + x] = translateValue(deepImage.getValue(x, y), offset);
     }
   }
   outputImage.updatePixels();
+  outputImage.endDraw();
 }
 
-color translateValue(float v) {
+color translateValue(float v, float offset) {
   color[] colors = palette.getColorsRef();
   int len = colors.length;
-  float offset = cp5.getController("paletteOffsetSlider").getValue();
   float value = (v / 256.0 + offset) * len;
   int index = floor(value % len);
   if (index >= len) {
@@ -237,27 +243,32 @@ void reset() {
   inputImage.loadPixels();
 
   deepImage.setImage(inputImage);
+
+  drawThing();
 }
 
 void drawThing() {
-  int count = 60;
-  brush.type(brush.TYPE_RECT_FALLOFF)
-    .value(160)
-    .width(imageWidth / (count - 1))
-    .height(imageHeight);
+  brush
+    .width(800)
+    .height(800)
+    .waveCount(14)
+    .value(64)
+    .type(brush.TYPE_RECT_WAVE);
 
-  for (int i = 0; i < count; i++) {
-    brush.draw(i * imageWidth / (count - 1), imageHeight/2);
-  }
+  drawBrush(400, 400);
 
-  brush.type(brush.TYPE_RECT_FALLOFF)
-    .width(imageWidth)
-    .height(imageHeight / (count - 1));
+  brush
+    .width(750)
+    .height(750)
+    .waveCount(8)
+    .value(128)
+    .type(brush.TYPE_WAVE_FALLOFF);
 
-  for (int i = 0; i < count; i++) {
-    brush.draw(imageWidth/2, i * imageHeight / (count - 1));
-  }
+  drawBrush(400, 400);
 
+  palette
+    .repeatCount(2)
+    .isMirrored(true);
 }
 
 void brushChanged() {
@@ -279,6 +290,9 @@ void brushChanged() {
 
 void keyReleased() {
   switch (key) {
+    case 'a':
+      saveAnimation();
+      break;
     case 'e':
     case ' ':
       reset();
@@ -362,11 +376,23 @@ boolean mouseHitTestImage() {
 
 void saveRender() {
   String filename = fileNamer.next();
-  save(filename);
+  outputImage.save(filename);
 
   String rawFilename = getRawFilename(filename);
   PImage inputImage = deepImage.getImageRef();
   inputImage.save(savePath(rawFilename));
+}
+
+void saveAnimation() {
+  FileNamer frameNamer = new FileNamer(animationFolderNamer.next() + "frame", "png");
+
+  int frameCount = 200;
+  for (int i = 0; i < frameCount; i++) {
+    String filename = frameNamer.next();
+    updateOutputImage((float)i / frameCount);
+
+    outputImage.save(filename);
+  }
 }
 
 String getRawFilename(String filename) {

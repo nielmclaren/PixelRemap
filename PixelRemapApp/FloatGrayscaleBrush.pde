@@ -23,6 +23,7 @@ class FloatGrayscaleBrush {
   public final int TYPE_VORONOI = 4;
   public final int TYPE_WAVE = 5;
   public final int TYPE_WAVE_FALLOFF = 6;
+  public final int TYPE_RECT_WAVE = 7;
 
   FloatGrayscaleBrush(FloatGrayscaleImage image, int w, int h) {
     _image = image;
@@ -139,6 +140,9 @@ class FloatGrayscaleBrush {
       case TYPE_WAVE_FALLOFF:
         brush.waveFalloffBrush(x, y);
         break;
+      case TYPE_RECT_WAVE:
+        brush.rectWaveBrush(x, y);
+        break;
       default:
         println("Unexpected brush type: " + _type);
     }
@@ -152,6 +156,7 @@ class FloatGrayscaleBrush {
     switch (_type) {
       case TYPE_RECT:
       case TYPE_RECT_FALLOFF:
+      case TYPE_RECT_WAVE:
         rectMode(CENTER);
         rect(mouseX, mouseY, _width, _height);
         break;
@@ -289,7 +294,7 @@ class FloatGrayscaleBrush {
         float d = sqrt(dx * dx / wSq  +  dy * dy / hSq);
         if (d > 1) continue;
 
-        float factor = (cos(d * _waveCount * (2 * PI)) + 1) / 2;
+        float factor = (cos(d * _waveCount * 2 * PI) + 1) / 2;
 
         float currentValue = _image.getValue(x, y);
         _image.setValue(x, y, constrain(currentValue + factor * _value, 0, 255));
@@ -317,8 +322,24 @@ class FloatGrayscaleBrush {
         factor = getFalloff(factor);
         factor = constrain(factor, 0, 1);
 
-        factor *= (cos(d * _waveCount * (2 * PI)) + 1) / 2;
+        factor *= (cos(d * _waveCount * 2 * PI) + 1) / 2;
 
+        float currentValue = _image.getValue(x, y);
+        _image.setValue(x, y, constrain(currentValue + factor * _value, 0, 255));
+      }
+    }
+  }
+
+  void rectWaveBrush(int targetX, int targetY) {
+    int halfWidth = floor(_width/2);
+    int halfHeight = floor(_height/2);
+    int size = halfWidth;
+
+    for (int x = targetX - halfWidth; x <= targetX + halfWidth; x++) {
+      if (x < 0 || x >= _imageWidth) continue;
+      for (int y = targetY - halfHeight; y <= targetY + halfHeight; y++) {
+        if (y < 0 || y >= _imageWidth) continue;
+        float factor = (cos(x * _waveCount / size * 2 * PI) + 1) / 2;
         float currentValue = _image.getValue(x, y);
         _image.setValue(x, y, constrain(currentValue + factor * _value, 0, 255));
       }
