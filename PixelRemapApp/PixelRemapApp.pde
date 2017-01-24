@@ -16,9 +16,9 @@ PaletteDisplay paletteDisplay;
 RadioButton brushTypeRadio;
 
 PGraphics inputImage, outputImage;
-FloatGrayscaleImage deepImage;
+DeepGrayscaleImage deepImage;
 
-FloatGrayscaleBrush brush;
+DeepGrayscaleBrush brush;
 
 boolean showInputImage;
 boolean isDragging;
@@ -43,11 +43,11 @@ void setup() {
 
   inputImage = createGraphics(imageWidth, imageHeight, P2D);
   outputImage = createGraphics(imageWidth, imageHeight, P2D);
-  deepImage = new FloatGrayscaleImage(imageWidth, imageHeight);
+  deepImage = new DeepGrayscaleImage(imageWidth, imageHeight);
 
   // Need an instance to get the brush constants.
   // FIXME: Use static constants somehow.
-  brush = new FloatGrayscaleBrush(deepImage, imageWidth, imageHeight);
+  brush = new DeepGrayscaleBrush(deepImage, imageWidth, imageHeight);
 
   setupUi();
   setupBrush();
@@ -58,7 +58,7 @@ void setup() {
 }
 
 void setupBrush() {
-  brush = new FloatGrayscaleBrush(deepImage, imageWidth, imageHeight)
+  brush = new DeepGrayscaleBrush(deepImage, imageWidth, imageHeight)
     .type(brush.TYPE_WAVE_FALLOFF)
     .value(32)
     .step(15)
