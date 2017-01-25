@@ -4,18 +4,10 @@ class Brush {
   int _imageWidth;
   int _imageHeight;
 
-  int _width;
-  int _height;
+  BrushSettings _brushSettings;
 
-  float _value;
-  int _step;
-  int _prevStepX;
-  int _prevStepY;
-
-  int _type;
-
-  float _waveCount;
-
+  // FIXME: These are duplicated from BrushSettings.
+  // Gotta get static final types working.
   public final int TYPE_RECT = 0;
   public final int TYPE_RECT_FALLOFF = 1;
   public final int TYPE_ELLIPSE = 2;
@@ -25,64 +17,34 @@ class Brush {
   public final int TYPE_WAVE_FALLOFF = 6;
   public final int TYPE_RECT_WAVE = 7;
 
+  int _prevStepX;
+  int _prevStepY;
+
   Brush(DeepGrayscaleImage image, int w, int h) {
     _image = image;
     _imageWidth = w;
     _imageHeight = h;
 
-    _width = 50;
-    _height = 30;
+    _brushSettings = new BrushSettings();
 
-    _value = 1;
-    _step = 5;
     _prevStepX = 0;
     _prevStepY = 0;
-
-    _type = TYPE_RECT;
-
-    _waveCount = 4;
   }
 
-  int width() {
-    return _width;
+  BrushSettings brushSettings() {
+    return _brushSettings;
   }
 
-  Brush width(int v) {
-    _width = v;
-    return this;
-  }
-
-  int height() {
-    return _height;
-  }
-
-  Brush height(int v) {
-    _height = v;
-    return this;
-  }
-
-  float value() {
-    return _value;
-  }
-
-  Brush value(float v) {
-    _value = v;
-    return this;
-  }
-
-  int step() {
-    return _step;
-  }
-
-  Brush step(int v) {
-    _step = v;
+  Brush brushSettings(BrushSettings v) {
+    _brushSettings = v;
     return this;
   }
 
   boolean stepCheck(int x, int y) {
+    int step = _brushSettings.step();
     float dx = x - _prevStepX;
     float dy = y - _prevStepY;
-    return _step * _step < dx * dx  +  dy * dy;
+    return step * step < dx * dx  +  dy * dy;
   }
 
   Brush stepped(int x, int y) {
@@ -99,26 +61,8 @@ class Brush {
     _image.setPixel(x, y, v);
   }
 
-  int type() {
-    return _type;
-  }
-
-  Brush type(int v) {
-    _type = v;
-    return this;
-  }
-
-  float waveCount() {
-    return _waveCount;
-  }
-
-  Brush waveCount(float v) {
-    _waveCount = v;
-    return this;
-  }
-
   void draw(int x, int y) {
-    switch (_type) {
+    switch (_brushSettings.type()) {
       case TYPE_RECT:
         brush.rectBrush(x, y);
         break;
@@ -144,7 +88,7 @@ class Brush {
         brush.rectWaveBrush(x, y);
         break;
       default:
-        println("Unexpected brush type: " + _type);
+        println("Unexpected brush type: " + _brushSettings.type());
     }
   }
 
@@ -153,12 +97,12 @@ class Brush {
     stroke(128);
     strokeWeight(2);
 
-    switch (_type) {
+    switch (_brushSettings.type()) {
       case TYPE_RECT:
       case TYPE_RECT_FALLOFF:
       case TYPE_RECT_WAVE:
         rectMode(CENTER);
-        rect(mouseX, mouseY, _width, _height);
+        rect(mouseX, mouseY, _brushSettings.width(), _brushSettings.height());
         break;
       case TYPE_ELLIPSE:
       case TYPE_ELLIPSE_FALLOFF:
@@ -166,29 +110,29 @@ class Brush {
       case TYPE_WAVE:
       case TYPE_WAVE_FALLOFF:
         ellipseMode(CENTER);
-        ellipse(mouseX, mouseY, _width, _height);
+        ellipse(mouseX, mouseY, _brushSettings.width(), _brushSettings.height());
         break;
       default:
-        println("Unexpected brush type: " + _type);
+        println("Unexpected brush type: " + _brushSettings.type());
     }
   }
 
   void rectBrush(int targetX, int targetY) {
-    int halfWidth = floor(_width/2);
-    int halfHeight = floor(_height/2);
+    int halfWidth = floor(_brushSettings.width()/2);
+    int halfHeight = floor(_brushSettings.height()/2);
 
     for (int x = targetX - halfWidth; x <= targetX + halfWidth; x++) {
       if (x < 0 || x >= _imageWidth) continue;
       for (int y = targetY - halfHeight; y <= targetY + halfHeight; y++) {
         if (y < 0 || y >= _imageWidth) continue;
-        _image.setFloatValue(x, y, constrain(_image.getFloatValue(x, y) + _value, 0, 1));
+        _image.setFloatValue(x, y, constrain(_image.getFloatValue(x, y) + _brushSettings.value(), 0, 1));
       }
     }
   }
 
   void rectFalloffBrush(int targetX, int targetY) {
-    int halfWidth = floor(_width/2);
-    int halfHeight = floor(_height/2);
+    int halfWidth = floor(_brushSettings.width()/2);
+    int halfHeight = floor(_brushSettings.height()/2);
 
     for (int x = targetX - halfWidth; x <= targetX + halfWidth; x++) {
       if (x < 0 || x >= _imageWidth) continue;
@@ -202,14 +146,14 @@ class Brush {
         factor = constrain(factor, 0, 1);
 
         float currentValue = _image.getFloatValue(x, y);
-        _image.setFloatValue(x, y, constrain(currentValue + factor * _value, 0, 1));
+        _image.setFloatValue(x, y, constrain(currentValue + factor * _brushSettings.value(), 0, 1));
       }
     }
   }
 
   void ellipseBrush(int targetX, int targetY) {
-    int halfWidth = floor(_width/2);
-    int halfHeight = floor(_height/2);
+    int halfWidth = floor(_brushSettings.width()/2);
+    int halfHeight = floor(_brushSettings.height()/2);
 
     float wSq = halfWidth * halfWidth;
     float hSq = halfHeight * halfHeight;
@@ -222,14 +166,14 @@ class Brush {
         float dy = y - targetY;
         if (dx * dx / wSq  +  dy * dy / hSq > 1) continue;
         // FIXME: Factor out blend mode.
-        _image.setFloatValue(x, y, _image.getFloatValue(x, y) + _value);
+        _image.setFloatValue(x, y, _image.getFloatValue(x, y) + _brushSettings.value());
       }
     }
   }
 
   void ellipseFalloffBrush(int targetX, int targetY) {
-    int halfWidth = floor(_width/2);
-    int halfHeight = floor(_height/2);
+    int halfWidth = floor(_brushSettings.width()/2);
+    int halfHeight = floor(_brushSettings.height()/2);
 
     float wSq = halfWidth * halfWidth;
     float hSq = halfHeight * halfHeight;
@@ -248,14 +192,14 @@ class Brush {
         factor = constrain(factor, 0, 1);
 
         float currentValue = _image.getFloatValue(x, y);
-        _image.setFloatValue(x, y, constrain(currentValue + factor * _value, 0, 1));
+        _image.setFloatValue(x, y, constrain(currentValue + factor * _brushSettings.value(), 0, 1));
       }
     }
   }
 
   void voronoiBrush(int targetX, int targetY) {
-    int halfWidth = floor(_width/2);
-    int halfHeight = floor(_height/2);
+    int halfWidth = floor(_brushSettings.width()/2);
+    int halfHeight = floor(_brushSettings.height()/2);
 
     float wSq = halfWidth * halfWidth;
     float hSq = halfHeight * halfHeight;
@@ -266,7 +210,7 @@ class Brush {
         if (y < 0 || y >= _imageHeight) continue;
         float dx = x - targetX;
         float dy = y - targetY;
-        float v = constrain(map(dx * dx / wSq + dy * dy / hSq, 0, 1, _value, 0), 0, 1);
+        float v = constrain(map(dx * dx / wSq + dy * dy / hSq, 0, 1, _brushSettings.value(), 0), 0, 1);
 
         float currentValue = _image.getFloatValue(x, y);
         _image.setFloatValue(x, y, max(currentValue, v));
@@ -275,8 +219,8 @@ class Brush {
   }
 
   void waveBrush(int targetX, int targetY) {
-    int halfWidth = floor(_width/2);
-    int halfHeight = floor(_height/2);
+    int halfWidth = floor(_brushSettings.width()/2);
+    int halfHeight = floor(_brushSettings.height()/2);
 
     float wSq = halfWidth * halfWidth;
     float hSq = halfHeight * halfHeight;
@@ -290,17 +234,17 @@ class Brush {
         float d = sqrt(dx * dx / wSq  +  dy * dy / hSq);
         if (d > 1) continue;
 
-        float factor = (cos(d * _waveCount * 2 * PI) + 1) / 2;
+        float factor = (cos(d * _brushSettings.waveCount() * 2 * PI) + 1) / 2;
 
         float currentValue = _image.getFloatValue(x, y);
-        _image.setFloatValue(x, y, constrain(currentValue + factor * _value, 0, 1));
+        _image.setFloatValue(x, y, constrain(currentValue + factor * _brushSettings.value(), 0, 1));
       }
     }
   }
 
   void waveFalloffBrush(int targetX, int targetY) {
-    int halfWidth = floor(_width/2);
-    int halfHeight = floor(_height/2);
+    int halfWidth = floor(_brushSettings.width()/2);
+    int halfHeight = floor(_brushSettings.height()/2);
 
     float wSq = halfWidth * halfWidth;
     float hSq = halfHeight * halfHeight;
@@ -318,26 +262,26 @@ class Brush {
         factor = getFalloff(factor);
         factor = constrain(factor, 0, 1);
 
-        factor *= (cos(d * _waveCount * 2 * PI) + 1) / 2;
+        factor *= (cos(d * _brushSettings.waveCount() * 2 * PI) + 1) / 2;
 
         float currentValue = _image.getFloatValue(x, y);
-        _image.setFloatValue(x, y, constrain(currentValue + factor * _value, 0, 1));
+        _image.setFloatValue(x, y, constrain(currentValue + factor * _brushSettings.value(), 0, 1));
       }
     }
   }
 
   void rectWaveBrush(int targetX, int targetY) {
-    int halfWidth = floor(_width/2);
-    int halfHeight = floor(_height/2);
+    int halfWidth = floor(_brushSettings.width()/2);
+    int halfHeight = floor(_brushSettings.height()/2);
     int size = halfWidth;
 
     for (int x = targetX - halfWidth; x <= targetX + halfWidth; x++) {
       if (x < 0 || x >= _imageWidth) continue;
       for (int y = targetY - halfHeight; y <= targetY + halfHeight; y++) {
         if (y < 0 || y >= _imageWidth) continue;
-        float factor = (cos(x * _waveCount / size * 2 * PI) + 1) / 2;
+        float factor = (cos(x * _brushSettings.waveCount() / size * 2 * PI) + 1) / 2;
         float currentValue = _image.getFloatValue(x, y);
-        _image.setFloatValue(x, y, constrain(currentValue + factor * _value, 0, 1));
+        _image.setFloatValue(x, y, constrain(currentValue + factor * _brushSettings.value(), 0, 1));
       }
     }
   }

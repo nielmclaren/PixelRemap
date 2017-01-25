@@ -18,6 +18,7 @@ RadioButton brushTypeRadio;
 PGraphics inputImage, outputImage;
 DeepGrayscaleImage deepImage;
 
+BrushSettings brushSettings;
 Brush brush;
 
 boolean showInputImage;
@@ -47,7 +48,7 @@ void setup() {
 
   // Need an instance to get the brush constants.
   // FIXME: Use static constants somehow.
-  brush = new Brush(deepImage, imageWidth, imageHeight);
+  brushSettings = new BrushSettings();
 
   setupUi();
   setupBrush();
@@ -59,12 +60,13 @@ void setup() {
 
 void setupBrush() {
   brush = new Brush(deepImage, imageWidth, imageHeight)
-    .type(brush.TYPE_WAVE_FALLOFF)
-    .value(32.0 / 256.0)
-    .step(15)
-    .width(300)
-    .height(300)
-    .waveCount(10);
+    .brushSettings(new BrushSettings()
+      .type(brushSettings.TYPE_WAVE_FALLOFF)
+      .value(32.0 / 256.0)
+      .step(15)
+      .width(300)
+      .height(300)
+      .waveCount(10));
 }
 
 void setupUi() {
@@ -105,15 +107,15 @@ void setupUi() {
     .setColorLabel(color(255))
     .setSpacingColumn(150)
     .setItemsPerRow(2)
-    .addItem("rect", brush.TYPE_RECT)
-    .addItem("rectFalloff", brush.TYPE_RECT_FALLOFF)
-    .addItem("ellipse", brush.TYPE_ELLIPSE)
-    .addItem("ellipseFalloff", brush.TYPE_ELLIPSE_FALLOFF)
-    .addItem("voronoi", brush.TYPE_VORONOI)
-    .addItem("wave", brush.TYPE_WAVE)
-    .addItem("waveFalloff", brush.TYPE_WAVE_FALLOFF)
-    .addItem("rectWaveBrush", brush.TYPE_RECT_WAVE);
-  brushTypeRadio.activate(brush.TYPE_WAVE_FALLOFF);
+    .addItem("rect", brushSettings.TYPE_RECT)
+    .addItem("rectFalloff", brushSettings.TYPE_RECT_FALLOFF)
+    .addItem("ellipse", brushSettings.TYPE_ELLIPSE)
+    .addItem("ellipseFalloff", brushSettings.TYPE_ELLIPSE_FALLOFF)
+    .addItem("voronoi", brushSettings.TYPE_VORONOI)
+    .addItem("wave", brushSettings.TYPE_WAVE)
+    .addItem("waveFalloff", brushSettings.TYPE_WAVE_FALLOFF)
+    .addItem("rectWave", brushSettings.TYPE_RECT_WAVE);
+  brushTypeRadio.activate(brushSettings.TYPE_WAVE_FALLOFF);
   currY += 100;
 
   cp5.addSlider("brushValueSlider")
@@ -249,22 +251,6 @@ void reset() {
 }
 
 void drawThing() {
-  int strokeCount = 12;
-  for (int i = 0; i < strokeCount; i++) {
-    int size = floor(random(800));
-    brush
-      .width(size)
-      .height(size)
-      .waveCount(floor(size / 40) + 0.5)
-      .value(random(0, 0.5))
-      .type(brush.TYPE_WAVE_FALLOFF);
-
-    drawBrush(floor(random(imageWidth)), floor(random(imageHeight)));
-  }
-
-  palette
-    .repeatCount(2)
-    .isMirrored(true);
 }
 
 void brushChanged() {
@@ -272,16 +258,18 @@ void brushChanged() {
     return;
   }
 
+  BrushSettings brushSettings = brush.brushSettings();
+
   brushTypeRadio.deactivateAll();
-  if (brush.type() >= 0) {
-    brushTypeRadio.activate(brush.type());
+  if (brush.brushSettings().type() >= 0) {
+    brushTypeRadio.activate(brushSettings.type());
   }
 
-  cp5.getController("brushValueSlider").setValue(brush.value());
-  cp5.getController("brushSizeSlider").setValue(brush.width());
-  cp5.getController("brushWidthSlider").setValue(brush.width());
-  cp5.getController("brushHeightSlider").setValue(brush.height());
-  cp5.getController("brushWaveCountSlider").setValue(brush.waveCount());
+  cp5.getController("brushValueSlider").setValue(brushSettings.value());
+  cp5.getController("brushSizeSlider").setValue(brushSettings.width());
+  cp5.getController("brushWidthSlider").setValue(brushSettings.width());
+  cp5.getController("brushHeightSlider").setValue(brushSettings.height());
+  cp5.getController("brushWaveCountSlider").setValue(brushSettings.waveCount());
 }
 
 void keyReleased() {
@@ -338,10 +326,14 @@ void mouseReleased() {
 }
 
 void controlEvent(ControlEvent event) {
+  BrushSettings brushSettings = brush.brushSettings();
+
   if(event.isFrom(brushTypeRadio)) {
-    brush.type(int(event.getValue()));
+    brushSettings.type(int(event.getValue()));
+    brush.brushSettings(brushSettings);
   } else if (event.isFrom(cp5.getController("brushValueSlider"))) {
-    brush.value(event.getValue());
+    brushSettings.value(event.getValue());
+    brush.brushSettings(brushSettings);
   } else if (event.isFrom(cp5.getController("brushSizeSlider"))) {
     int v = floor(event.getValue());
     if (cp5.getController("brushWidthSlider") != null) {
@@ -350,14 +342,18 @@ void controlEvent(ControlEvent event) {
     if (cp5.getController("brushHeightSlider") != null) {
       cp5.getController("brushHeightSlider").setValue(v);
     }
-    brush.width(v);
-    brush.height(v);
+    brushSettings.width(v);
+    brushSettings.height(v);
+    brush.brushSettings(brushSettings);
   } else if (event.isFrom(cp5.getController("brushWidthSlider"))) {
-    brush.width(floor(event.getValue()));
+    brushSettings.width(floor(event.getValue()));
+    brush.brushSettings(brushSettings);
   } else if (event.isFrom(cp5.getController("brushHeightSlider"))) {
-    brush.height(floor(event.getValue()));
+    brushSettings.height(floor(event.getValue()));
+    brush.brushSettings(brushSettings);
   } else if (event.isFrom(cp5.getController("brushWaveCountSlider"))) {
-    brush.waveCount(event.getValue());
+    brushSettings.waveCount(event.getValue());
+    brush.brushSettings(brushSettings);
   }
 }
 
