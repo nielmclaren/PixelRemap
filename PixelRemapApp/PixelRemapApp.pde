@@ -18,7 +18,6 @@ RadioButton brushTypeRadio;
 PGraphics inputImage, outputImage;
 DeepGrayscaleImage deepImage;
 
-BrushSettings brushSettings;
 Brush brush;
 
 boolean showInputImage;
@@ -46,10 +45,6 @@ void setup() {
   outputImage = createGraphics(imageWidth, imageHeight, P2D);
   deepImage = new DeepGrayscaleImage(imageWidth, imageHeight);
 
-  // Need an instance to get the brush constants.
-  // FIXME: Use static constants somehow.
-  brushSettings = new BrushSettings();
-
   setupUi();
   setupBrush();
   setupPalette();
@@ -61,7 +56,7 @@ void setup() {
 void setupBrush() {
   brush = new Brush(deepImage, imageWidth, imageHeight)
     .brushSettings(new BrushSettings()
-      .type(brushSettings.TYPE_WAVE_FALLOFF)
+      .type(BrushType.WAVE_FALLOFF)
       .value(32.0 / 256.0)
       .step(15)
       .width(300)
@@ -107,15 +102,15 @@ void setupUi() {
     .setColorLabel(color(255))
     .setSpacingColumn(150)
     .setItemsPerRow(2)
-    .addItem("rect", brushSettings.TYPE_RECT)
-    .addItem("rectFalloff", brushSettings.TYPE_RECT_FALLOFF)
-    .addItem("ellipse", brushSettings.TYPE_ELLIPSE)
-    .addItem("ellipseFalloff", brushSettings.TYPE_ELLIPSE_FALLOFF)
-    .addItem("voronoi", brushSettings.TYPE_VORONOI)
-    .addItem("wave", brushSettings.TYPE_WAVE)
-    .addItem("waveFalloff", brushSettings.TYPE_WAVE_FALLOFF)
-    .addItem("rectWave", brushSettings.TYPE_RECT_WAVE);
-  brushTypeRadio.activate(brushSettings.TYPE_WAVE_FALLOFF);
+    .addItem("rect", BrushType.RECT)
+    .addItem("rectFalloff", BrushType.RECT_FALLOFF)
+    .addItem("ellipse", BrushType.ELLIPSE)
+    .addItem("ellipseFalloff", BrushType.ELLIPSE_FALLOFF)
+    .addItem("voronoi", BrushType.VORONOI)
+    .addItem("wave", BrushType.WAVE)
+    .addItem("waveFalloff", BrushType.WAVE_FALLOFF)
+    .addItem("rectWave", BrushType.RECT_WAVE);
+  brushTypeRadio.activate(BrushType.WAVE_FALLOFF);
   currY += 100;
 
   cp5.addSlider("brushValueSlider")

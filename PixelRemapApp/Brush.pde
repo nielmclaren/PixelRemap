@@ -6,17 +6,6 @@ class Brush {
 
   BrushSettings _brushSettings;
 
-  // FIXME: These are duplicated from BrushSettings.
-  // Gotta get static final types working.
-  public final int TYPE_RECT = 0;
-  public final int TYPE_RECT_FALLOFF = 1;
-  public final int TYPE_ELLIPSE = 2;
-  public final int TYPE_ELLIPSE_FALLOFF = 3;
-  public final int TYPE_VORONOI = 4;
-  public final int TYPE_WAVE = 5;
-  public final int TYPE_WAVE_FALLOFF = 6;
-  public final int TYPE_RECT_WAVE = 7;
-
   int _prevStepX;
   int _prevStepY;
 
@@ -63,28 +52,28 @@ class Brush {
 
   void draw(int x, int y) {
     switch (_brushSettings.type()) {
-      case TYPE_RECT:
+      case BrushType.RECT:
         brush.rectBrush(x, y);
         break;
-      case TYPE_RECT_FALLOFF:
+      case BrushType.RECT_FALLOFF:
         brush.rectFalloffBrush(x, y);
         break;
-      case TYPE_ELLIPSE:
+      case BrushType.ELLIPSE:
         brush.ellipseBrush(x, y);
         break;
-      case TYPE_ELLIPSE_FALLOFF:
+      case BrushType.ELLIPSE_FALLOFF:
         brush.ellipseFalloffBrush(x, y);
         break;
-      case TYPE_VORONOI:
+      case BrushType.VORONOI:
         brush.voronoiBrush(x, y);
         break;
-      case TYPE_WAVE:
+      case BrushType.WAVE:
         brush.waveBrush(x, y);
         break;
-      case TYPE_WAVE_FALLOFF:
+      case BrushType.WAVE_FALLOFF:
         brush.waveFalloffBrush(x, y);
         break;
-      case TYPE_RECT_WAVE:
+      case BrushType.RECT_WAVE:
         brush.rectWaveBrush(x, y);
         break;
       default:
@@ -98,17 +87,17 @@ class Brush {
     strokeWeight(2);
 
     switch (_brushSettings.type()) {
-      case TYPE_RECT:
-      case TYPE_RECT_FALLOFF:
-      case TYPE_RECT_WAVE:
+      case BrushType.RECT:
+      case BrushType.RECT_FALLOFF:
+      case BrushType.RECT_WAVE:
         rectMode(CENTER);
         rect(mouseX, mouseY, _brushSettings.width(), _brushSettings.height());
         break;
-      case TYPE_ELLIPSE:
-      case TYPE_ELLIPSE_FALLOFF:
-      case TYPE_VORONOI:
-      case TYPE_WAVE:
-      case TYPE_WAVE_FALLOFF:
+      case BrushType.ELLIPSE:
+      case BrushType.ELLIPSE_FALLOFF:
+      case BrushType.VORONOI:
+      case BrushType.WAVE:
+      case BrushType.WAVE_FALLOFF:
         ellipseMode(CENTER);
         ellipse(mouseX, mouseY, _brushSettings.width(), _brushSettings.height());
         break;
