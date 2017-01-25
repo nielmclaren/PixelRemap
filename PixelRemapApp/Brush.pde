@@ -1,5 +1,5 @@
 
-class DeepGrayscaleBrush {
+class Brush {
   DeepGrayscaleImage _image;
   int _imageWidth;
   int _imageHeight;
@@ -25,7 +25,7 @@ class DeepGrayscaleBrush {
   public final int TYPE_WAVE_FALLOFF = 6;
   public final int TYPE_RECT_WAVE = 7;
 
-  DeepGrayscaleBrush(DeepGrayscaleImage image, int w, int h) {
+  Brush(DeepGrayscaleImage image, int w, int h) {
     _image = image;
     _imageWidth = w;
     _imageHeight = h;
@@ -47,7 +47,7 @@ class DeepGrayscaleBrush {
     return _width;
   }
 
-  DeepGrayscaleBrush width(int v) {
+  Brush width(int v) {
     _width = v;
     return this;
   }
@@ -56,7 +56,7 @@ class DeepGrayscaleBrush {
     return _height;
   }
 
-  DeepGrayscaleBrush height(int v) {
+  Brush height(int v) {
     _height = v;
     return this;
   }
@@ -65,7 +65,7 @@ class DeepGrayscaleBrush {
     return _value;
   }
 
-  DeepGrayscaleBrush value(float v) {
+  Brush value(float v) {
     _value = v;
     return this;
   }
@@ -74,7 +74,7 @@ class DeepGrayscaleBrush {
     return _step;
   }
 
-  DeepGrayscaleBrush step(int v) {
+  Brush step(int v) {
     _step = v;
     return this;
   }
@@ -85,7 +85,7 @@ class DeepGrayscaleBrush {
     return _step * _step < dx * dx  +  dy * dy;
   }
 
-  DeepGrayscaleBrush stepped(int x, int y) {
+  Brush stepped(int x, int y) {
     _prevStepX = x;
     _prevStepY = y;
     return this;
@@ -103,7 +103,7 @@ class DeepGrayscaleBrush {
     return _type;
   }
 
-  DeepGrayscaleBrush type(int v) {
+  Brush type(int v) {
     _type = v;
     return this;
   }
@@ -112,7 +112,7 @@ class DeepGrayscaleBrush {
     return _waveCount;
   }
 
-  DeepGrayscaleBrush waveCount(float v) {
+  Brush waveCount(float v) {
     _waveCount = v;
     return this;
   }

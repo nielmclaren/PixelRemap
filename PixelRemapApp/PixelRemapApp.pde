@@ -18,7 +18,7 @@ RadioButton brushTypeRadio;
 PGraphics inputImage, outputImage;
 DeepGrayscaleImage deepImage;
 
-DeepGrayscaleBrush brush;
+Brush brush;
 
 boolean showInputImage;
 boolean isDragging;
@@ -47,7 +47,7 @@ void setup() {
 
   // Need an instance to get the brush constants.
   // FIXME: Use static constants somehow.
-  brush = new DeepGrayscaleBrush(deepImage, imageWidth, imageHeight);
+  brush = new Brush(deepImage, imageWidth, imageHeight);
 
   setupUi();
   setupBrush();
@@ -58,7 +58,7 @@ void setup() {
 }
 
 void setupBrush() {
-  brush = new DeepGrayscaleBrush(deepImage, imageWidth, imageHeight)
+  brush = new Brush(deepImage, imageWidth, imageHeight)
     .type(brush.TYPE_WAVE_FALLOFF)
     .value(32.0 / 256.0)
     .step(15)
