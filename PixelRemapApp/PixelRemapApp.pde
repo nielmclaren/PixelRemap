@@ -165,11 +165,11 @@ void setupPalette() {
     .repeatCount(1)
     .isMirrored(false)
     .isReversed(false)
-    .addFilename("pinkredgrad.png")
+    .addFilename("cavegrad.png")
     .addFilename("mirage_sunset_dark.png")
+    .addFilename("pinkredgrad.png")
     .addFilename("mirage_sunset.png")
     .addFilename("doraemon_palette.png")
-    .addFilename("cavegrad.png")
     .addFilename("halograd.png")
     .addFilename("neon.png")
     .addFilename("stripe02.png")
@@ -250,6 +250,30 @@ void reset() {
 }
 
 void drawThing() {
+  brush.brushSettings(new BrushSettings()
+      .type(BrushType.ELLIPSE_FALLOFF));
+
+  for (int i = 0; i < 10; i++) {
+    int w = floor(random(200, 600));
+    int h = floor(random(w - 100, w + 100));
+    brush.brushSettings(brush.brushSettings()
+        .value(h / imageHeight)
+        .width(w)
+        .height(h));
+    drawBrush(floor(random(imageWidth)), floor(random(imageHeight)));
+  }
+
+  brush.brushSettings(new BrushSettings()
+      .type(BrushType.WAVE_FALLOFF));
+
+  for (int i = 0; i < 20; i++) {
+    int w = floor(random(200, 600));
+    int h = floor(random(w - 100, w + 100));
+    brush.brushSettings(brush.brushSettings()
+        .width(w)
+        .height(h));
+    drawBrush(floor(random(imageWidth)), floor(random(imageHeight)));
+  }
 }
 
 void brushChanged() {
