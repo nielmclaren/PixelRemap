@@ -21,7 +21,7 @@ class Brush {
   }
 
   BrushSettings brushSettings() {
-    return _brushSettings;
+    return (BrushSettings)_brushSettings.clone();
   }
 
   Brush brushSettings(BrushSettings v) {

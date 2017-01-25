@@ -1,5 +1,5 @@
 
-class BrushSettings {
+class BrushSettings implements Cloneable {
   int _width;
   int _height;
 
@@ -70,5 +70,15 @@ class BrushSettings {
   BrushSettings waveCount(float v) {
     _waveCount = v;
     return this;
+  }
+
+  Object clone() {
+    return new BrushSettings()
+      .width(_width)
+      .height(_height)
+      .value(_value)
+      .step(_step)
+      .type(_type)
+      .waveCount(_waveCount);
   }
 }

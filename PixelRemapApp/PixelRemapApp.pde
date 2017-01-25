@@ -23,6 +23,8 @@ Brush brush;
 boolean showInputImage;
 boolean isDragging;
 
+ArrayList<Action> actions;
+
 FileNamer animationFolderNamer, fileNamer;
 
 void setup() {
@@ -37,6 +39,8 @@ void setup() {
 
   showInputImage = false;
   isDragging = false;
+
+  actions = new ArrayList<Action>();
 
   animationFolderNamer = new FileNamer("output/anim", "/");
   fileNamer = new FileNamer("output/export", "png");
@@ -294,6 +298,14 @@ void keyReleased() {
       palette.toggleReversed();
       paletteChanged();
       break;
+    case 'h':
+      replayActions();
+      break;
+    case 'z':
+      actions.remove(actions.size() - 1);
+      reset();
+      replayActions();
+      break;
   }
 }
 
@@ -353,7 +365,16 @@ void controlEvent(ControlEvent event) {
 }
 
 void drawBrush(int x, int y) {
-  brush.draw(x, y);
+  BrushAction action = new BrushAction()
+      .brushSettings(brush.brushSettings())
+      .position(x, y);
+  doBrushAction(action);
+  actions.add(action);
+}
+
+void doBrushAction(BrushAction action) {
+  brush.brushSettings(action.brushSettings());
+  brush.draw(action.x(), action.y());
 }
 
 boolean mouseHitTestImage() {
@@ -390,4 +411,14 @@ String getRawFilename(String filename) {
   String extension = filename.substring(index);
 
   return pathAndBaseName + "raw" + extension;
+}
+
+void replayActions() {
+  for (int i = 0; i < actions.size(); i++) {
+    Action action = actions.get(i);
+    if (action.type() == ActionType.BRUSH) {
+      BrushAction brushAction = (BrushAction)action;
+      doBrushAction(brushAction);
+    }
+  }
 }
