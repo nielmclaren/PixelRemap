@@ -17,6 +17,7 @@ RadioButton brushTypeRadio;
 
 PGraphics inputImage, outputImage;
 DeepGrayscaleImage deepImage;
+PImage overlayImage;
 
 Brush brush;
 
@@ -24,6 +25,8 @@ boolean showInputImage;
 boolean isDragging;
 
 ArrayList<Action> actions;
+
+float waveOffset;
 
 FileNamer animationFolderNamer, fileNamer;
 
@@ -48,6 +51,10 @@ void setup() {
   inputImage = createGraphics(imageWidth, imageHeight, P2D);
   outputImage = createGraphics(imageWidth, imageHeight, P2D);
   deepImage = new DeepGrayscaleImage(imageWidth, imageHeight);
+
+  overlayImage = loadImage("sunglassescat.png");
+
+  waveOffset = 0;
 
   setupUi();
   setupBrush();
@@ -158,6 +165,15 @@ void setupUi() {
     .showTickMarks(false)
     .snapToTickMarks(true);
   currY += 30;
+
+  cp5.addSlider("brushWaveOffsetSlider")
+    .setPosition(currX, currY)
+    .setSize(240, 20)
+    .setRange(0.0, 1.0)
+    .setNumberOfTickMarks(20 + 1)
+    .showTickMarks(false)
+    .snapToTickMarks(true);
+  currY += 30;
 }
 
 void setupPalette() {
@@ -187,10 +203,13 @@ void draw() {
     image(inputImage, imageX, imageY, imageWidth, imageHeight);
   }
   else {
-    float offset = cp5.getController("paletteOffsetSlider").getValue();
-    updateOutputImage(offset);
+    float paletteOffset = cp5.getController("paletteOffsetSlider").getValue();
+    waveOffset = cp5.getController("brushWaveOffsetSlider").getValue();
+    updateOutputImage(paletteOffset);
     image(outputImage, imageX, imageY, imageWidth, imageHeight);
   }
+
+  image(overlayImage, imageX, imageY, imageWidth, imageHeight);
 
   paletteDisplay.draw(g);
 
@@ -207,23 +226,23 @@ void updateRepeatCount() {
   }
 }
 
-void updateOutputImage(float offset) {
+void updateOutputImage(float paletteOffset) {
   outputImage.beginDraw();
   outputImage.loadPixels();
   outputImage.pixels[0] = color(0);
   for (int y = 0; y < outputImage.height; y++) {
     for (int x = 0; x < outputImage.width; x++) {
-      outputImage.pixels[y * outputImage.width + x] = translateValue(deepImage.getFloatValue(x, y), offset);
+      outputImage.pixels[y * outputImage.width + x] = translateValue(deepImage.getFloatValue(x, y), paletteOffset);
     }
   }
   outputImage.updatePixels();
   outputImage.endDraw();
 }
 
-color translateValue(float v, float offset) {
+color translateValue(float v, float paletteOffset) {
   color[] colors = palette.getColorsRef();
   int len = colors.length;
-  float value = (v + offset) * len;
+  float value = (v + paletteOffset) * len;
   int index = floor(value % len);
   if (index >= len) {
     index--;
@@ -245,35 +264,11 @@ void reset() {
   inputImage.loadPixels();
 
   deepImage.setImage(inputImage);
-
-  drawThing();
 }
 
-void drawThing() {
-  brush.brushSettings(new BrushSettings()
-      .type(BrushType.ELLIPSE_FALLOFF));
-
-  for (int i = 0; i < 10; i++) {
-    int w = floor(random(200, 600));
-    int h = floor(random(w - 100, w + 100));
-    brush.brushSettings(brush.brushSettings()
-        .value(h / imageHeight)
-        .width(w)
-        .height(h));
-    drawBrush(floor(random(imageWidth)), floor(random(imageHeight)));
-  }
-
-  brush.brushSettings(new BrushSettings()
-      .type(BrushType.WAVE_FALLOFF));
-
-  for (int i = 0; i < 20; i++) {
-    int w = floor(random(200, 600));
-    int h = floor(random(w - 100, w + 100));
-    brush.brushSettings(brush.brushSettings()
-        .width(w)
-        .height(h));
-    drawBrush(floor(random(imageWidth)), floor(random(imageHeight)));
-  }
+void redraw() {
+  reset();
+  replayActions();
 }
 
 void brushChanged() {
@@ -299,6 +294,9 @@ void keyReleased() {
   switch (key) {
     case 'a':
       saveAnimation();
+      break;
+    case 'c':
+      clearActions();
       break;
     case 'e':
     case ' ':
@@ -385,6 +383,8 @@ void controlEvent(ControlEvent event) {
   } else if (event.isFrom(cp5.getController("brushWaveCountSlider"))) {
     brushSettings.waveCount(event.getValue());
     brush.brushSettings(brushSettings);
+  } else if (event.isFrom(cp5.getController("brushWaveOffsetSlider"))) {
+    redraw();
   }
 }
 
@@ -398,7 +398,7 @@ void drawBrush(int x, int y) {
 
 void doBrushAction(BrushAction action) {
   brush.brushSettings(action.brushSettings());
-  brush.draw(action.x(), action.y());
+  brush.draw(action.x(), action.y(), waveOffset);
 }
 
 boolean mouseHitTestImage() {
@@ -417,13 +417,22 @@ void saveRender() {
 
 void saveAnimation() {
   FileNamer frameNamer = new FileNamer(animationFolderNamer.next() + "frame", "png");
+  PGraphics saver = createGraphics(imageWidth, imageHeight, P2D);
 
-  int frameCount = 200;
+  int frameCount = 50;
   for (int i = 0; i < frameCount; i++) {
     String filename = frameNamer.next();
-    updateOutputImage((float)i / frameCount);
+    reset();
+    waveOffset = (float)i / frameCount;
+    replayActions();
+    //updateOutputImage((float)i / frameCount);
+    updateOutputImage(0);
 
-    outputImage.save(filename);
+    saver.beginDraw();
+    saver.image(outputImage, 0, 0, imageWidth, imageHeight);
+    saver.image(overlayImage, 0, 0, imageWidth, imageHeight);
+    saver.endDraw();
+    saver.save(filename);
   }
 }
 
@@ -435,6 +444,10 @@ String getRawFilename(String filename) {
   String extension = filename.substring(index);
 
   return pathAndBaseName + "raw" + extension;
+}
+
+void clearActions() {
+  actions = new ArrayList<Action>();
 }
 
 void replayActions() {

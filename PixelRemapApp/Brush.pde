@@ -51,6 +51,10 @@ class Brush {
   }
 
   void draw(int x, int y) {
+    draw(x, y, 0);
+  }
+
+  void draw(int x, int y, float timeOffset) {
     switch (_brushSettings.type()) {
       case BrushType.RECT:
         brush.rectBrush(x, y);
@@ -68,13 +72,13 @@ class Brush {
         brush.voronoiBrush(x, y);
         break;
       case BrushType.WAVE:
-        brush.waveBrush(x, y);
+        brush.waveBrush(x, y, timeOffset);
         break;
       case BrushType.WAVE_FALLOFF:
-        brush.waveFalloffBrush(x, y);
+        brush.waveFalloffBrush(x, y, timeOffset);
         break;
       case BrushType.RECT_WAVE:
-        brush.rectWaveBrush(x, y);
+        brush.rectWaveBrush(x, y, timeOffset);
         break;
       default:
         println("Unexpected brush type: " + _brushSettings.type());
@@ -207,7 +211,7 @@ class Brush {
     }
   }
 
-  void waveBrush(int targetX, int targetY) {
+  void waveBrush(int targetX, int targetY, float timeOffset) {
     int halfWidth = floor(_brushSettings.width()/2);
     int halfHeight = floor(_brushSettings.height()/2);
 
@@ -223,7 +227,7 @@ class Brush {
         float d = sqrt(dx * dx / wSq  +  dy * dy / hSq);
         if (d > 1) continue;
 
-        float factor = (cos(d * _brushSettings.waveCount() * 2 * PI) + 1) / 2;
+        float factor = (cos((d * _brushSettings.waveCount() - timeOffset) * 2 * PI) + 1) / 2;
 
         float currentValue = _image.getFloatValue(x, y);
         _image.setFloatValue(x, y, constrain(currentValue + factor * _brushSettings.value(), 0, 1));
@@ -231,7 +235,7 @@ class Brush {
     }
   }
 
-  void waveFalloffBrush(int targetX, int targetY) {
+  void waveFalloffBrush(int targetX, int targetY, float timeOffset) {
     int halfWidth = floor(_brushSettings.width()/2);
     int halfHeight = floor(_brushSettings.height()/2);
 
@@ -251,7 +255,7 @@ class Brush {
         factor = getFalloff(factor);
         factor = constrain(factor, 0, 1);
 
-        factor *= (cos(d * _brushSettings.waveCount() * 2 * PI) + 1) / 2;
+        factor *= (cos((d * _brushSettings.waveCount() - timeOffset) * 2 * PI) + 1) / 2;
 
         float currentValue = _image.getFloatValue(x, y);
         _image.setFloatValue(x, y, constrain(currentValue + factor * _brushSettings.value(), 0, 1));
@@ -259,7 +263,7 @@ class Brush {
     }
   }
 
-  void rectWaveBrush(int targetX, int targetY) {
+  void rectWaveBrush(int targetX, int targetY, float timeOffset) {
     int halfWidth = floor(_brushSettings.width()/2);
     int halfHeight = floor(_brushSettings.height()/2);
     int size = halfWidth;
@@ -268,7 +272,7 @@ class Brush {
       if (x < 0 || x >= _imageWidth) continue;
       for (int y = targetY - halfHeight; y <= targetY + halfHeight; y++) {
         if (y < 0 || y >= _imageWidth) continue;
-        float factor = (cos(x * _brushSettings.waveCount() / size * 2 * PI) + 1) / 2;
+        float factor = (cos((x * _brushSettings.waveCount() / size - timeOffset) * 2 * PI) + 1) / 2;
         float currentValue = _image.getFloatValue(x, y);
         _image.setFloatValue(x, y, constrain(currentValue + factor * _brushSettings.value(), 0, 1));
       }
