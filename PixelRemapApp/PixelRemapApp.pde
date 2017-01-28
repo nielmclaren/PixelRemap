@@ -290,6 +290,9 @@ void keyReleased() {
     case 'a':
       saveAnimation();
       break;
+    case 'b':
+      toggleBlendMode();
+      break;
     case 'c':
       clearActions();
       break;
@@ -422,6 +425,17 @@ void saveAnimation() {
     updateOutputImage(0);
 
     outputImage.save(filename);
+  }
+}
+
+void toggleBlendMode() {
+  if (brush.brushSettings().blendMode() == BlendMode.ADD) {
+    BrushSettings settings = brush.brushSettings();
+    settings.blendMode(BlendMode.SUBTRACT);
+    brush.brushSettings(settings);
+  } else {
+    brush.brushSettings(
+        brush.brushSettings().blendMode(BlendMode.ADD));
   }
 }
 

@@ -8,6 +8,8 @@ class BrushSettings implements Cloneable {
   int _type;
   float _waveCount;
 
+  int _blendMode;
+
   BrushSettings() {
     _width = 50;
     _height = 30;
@@ -16,6 +18,8 @@ class BrushSettings implements Cloneable {
     _step = 5;
     _type = BrushType.RECT;
     _waveCount = 4;
+
+    _blendMode = BlendMode.ADD;
   }
 
   int width() {
@@ -72,6 +76,15 @@ class BrushSettings implements Cloneable {
     return this;
   }
 
+  int blendMode() {
+    return _blendMode;
+  }
+
+  BrushSettings blendMode(int v) {
+    _blendMode = v;
+    return this;
+  }
+
   Object clone() {
     return new BrushSettings()
       .width(_width)
@@ -79,6 +92,7 @@ class BrushSettings implements Cloneable {
       .value(_value)
       .step(_step)
       .type(_type)
-      .waveCount(_waveCount);
+      .waveCount(_waveCount)
+      .blendMode(_blendMode);
   }
 }

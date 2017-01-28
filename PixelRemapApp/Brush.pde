@@ -81,7 +81,6 @@ class Brush {
         brush.rectWaveBrush(x, y, timeOffset);
         break;
       default:
-        println("Unexpected brush type: " + _brushSettings.type());
     }
   }
 
@@ -106,7 +105,6 @@ class Brush {
         ellipse(mouseX, mouseY, _brushSettings.width(), _brushSettings.height());
         break;
       default:
-        println("Unexpected brush type: " + _brushSettings.type());
     }
   }
 
@@ -158,8 +156,8 @@ class Brush {
         float dx = x - targetX;
         float dy = y - targetY;
         if (dx * dx / wSq  +  dy * dy / hSq > 1) continue;
-        // FIXME: Factor out blend mode.
-        _image.setFloatValue(x, y, _image.getFloatValue(x, y) + _brushSettings.value());
+
+        _image.setFloatValue(x, y, blendFloatValue(_image.getFloatValue(x, y), _brushSettings.value()));
       }
     }
   }
@@ -184,8 +182,7 @@ class Brush {
         factor = getFalloff(factor);
         factor = constrain(factor, 0, 1);
 
-        float currentValue = _image.getFloatValue(x, y);
-        _image.setFloatValue(x, y, constrain(currentValue + factor * _brushSettings.value(), 0, 1));
+        _image.setFloatValue(x, y, blendFloatValue(_image.getFloatValue(x, y), factor * _brushSettings.value()));
       }
     }
   }
@@ -229,8 +226,7 @@ class Brush {
 
         float factor = (cos((d * _brushSettings.waveCount() - timeOffset) * 2 * PI) + 1) / 2;
 
-        float currentValue = _image.getFloatValue(x, y);
-        _image.setFloatValue(x, y, constrain(currentValue + factor * _brushSettings.value(), 0, 1));
+        _image.setFloatValue(x, y, blendFloatValue(_image.getFloatValue(x, y), factor * _brushSettings.value()));
       }
     }
   }
@@ -257,8 +253,7 @@ class Brush {
 
         factor *= (cos((d * _brushSettings.waveCount() - timeOffset) * 2 * PI) + 1) / 2;
 
-        float currentValue = _image.getFloatValue(x, y);
-        _image.setFloatValue(x, y, constrain(currentValue + factor * _brushSettings.value(), 0, 1));
+        _image.setFloatValue(x, y, blendFloatValue(_image.getFloatValue(x, y), factor * _brushSettings.value()));
       }
     }
   }
@@ -273,9 +268,22 @@ class Brush {
       for (int y = targetY - halfHeight; y <= targetY + halfHeight; y++) {
         if (y < 0 || y >= _imageWidth) continue;
         float factor = (cos((x * _brushSettings.waveCount() / size - timeOffset) * 2 * PI) + 1) / 2;
-        float currentValue = _image.getFloatValue(x, y);
-        _image.setFloatValue(x, y, constrain(currentValue + factor * _brushSettings.value(), 0, 1));
+        _image.setFloatValue(x, y, blendFloatValue(_image.getFloatValue(x, y), factor * _brushSettings.value()));
       }
+    }
+  }
+
+  private float blendFloatValue(float original, float target) {
+    int blendMode = _brushSettings.blendMode();
+    switch (blendMode) {
+      case BlendMode.BLEND:
+        return target;
+      case BlendMode.ADD:
+        return constrain(original + target, 0, 1);
+      case BlendMode.SUBTRACT:
+        return constrain(original - target, 0, 1);
+      default:
+        return target;
     }
   }
 
