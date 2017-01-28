@@ -17,7 +17,6 @@ RadioButton brushTypeRadio;
 
 PGraphics inputImage, outputImage;
 DeepGrayscaleImage deepImage;
-PImage overlayImage;
 
 Brush brush;
 
@@ -51,8 +50,6 @@ void setup() {
   inputImage = createGraphics(imageWidth, imageHeight, P2D);
   outputImage = createGraphics(imageWidth, imageHeight, P2D);
   deepImage = new DeepGrayscaleImage(imageWidth, imageHeight);
-
-  overlayImage = loadImage("sunglassescat.png");
 
   waveOffset = 0;
 
@@ -208,8 +205,6 @@ void draw() {
     updateOutputImage(paletteOffset);
     image(outputImage, imageX, imageY, imageWidth, imageHeight);
   }
-
-  image(overlayImage, imageX, imageY, imageWidth, imageHeight);
 
   paletteDisplay.draw(g);
 
@@ -417,7 +412,6 @@ void saveRender() {
 
 void saveAnimation() {
   FileNamer frameNamer = new FileNamer(animationFolderNamer.next() + "frame", "png");
-  PGraphics saver = createGraphics(imageWidth, imageHeight, P2D);
 
   int frameCount = 50;
   for (int i = 0; i < frameCount; i++) {
@@ -425,14 +419,9 @@ void saveAnimation() {
     reset();
     waveOffset = (float)i / frameCount;
     replayActions();
-    //updateOutputImage((float)i / frameCount);
     updateOutputImage(0);
 
-    saver.beginDraw();
-    saver.image(outputImage, 0, 0, imageWidth, imageHeight);
-    saver.image(overlayImage, 0, 0, imageWidth, imageHeight);
-    saver.endDraw();
-    saver.save(filename);
+    outputImage.save(filename);
   }
 }
 
