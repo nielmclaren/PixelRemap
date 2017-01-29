@@ -178,6 +178,7 @@ void setupPalette() {
     .repeatCount(1)
     .isMirrored(false)
     .isReversed(false)
+    .addFilename("wood.png")
     .addFilename("cavegrad.png")
     .addFilename("mirage_sunset_dark.png")
     .addFilename("pinkredgrad.png")
@@ -201,8 +202,9 @@ void draw() {
   }
   else {
     float paletteOffset = cp5.getController("paletteOffsetSlider").getValue();
+    float paletteRepeat = cp5.getController("paletteRepeatSlider").getValue();
     waveOffset = cp5.getController("brushWaveOffsetSlider").getValue();
-    updateOutputImage(paletteOffset);
+    updateOutputImage(paletteOffset / paletteRepeat);
     image(outputImage, imageX, imageY, imageWidth, imageHeight);
   }
 
@@ -257,6 +259,27 @@ void reset() {
   inputImage.endDraw();
 
   inputImage.loadPixels();
+
+  deepImage.setImage(inputImage);
+
+  drawThing();
+}
+
+void drawThing() {
+  float noiseScale = 0.001;
+  float offsetX = random(1);
+  float offsetY = random(1);
+  println("Noise offset: " + offsetX + ", " + offsetY);
+
+  inputImage.beginDraw();
+  inputImage.loadPixels();
+  for (int x = 0; x < imageWidth; x++) {
+    for (int y = 0; y < imageHeight; y++) {
+      inputImage.pixels[y * imageWidth + x] = color(noise(offsetX + x * noiseScale, offsetY + y * noiseScale) * 255);
+    }
+  }
+  inputImage.updatePixels();
+  inputImage.endDraw();
 
   deepImage.setImage(inputImage);
 }
@@ -416,13 +439,11 @@ void saveRender() {
 void saveAnimation() {
   FileNamer frameNamer = new FileNamer(animationFolderNamer.next() + "frame", "png");
 
-  int frameCount = 50;
+  int repeatCount = palette.repeatCount();
+  int frameCount = 30;
   for (int i = 0; i < frameCount; i++) {
     String filename = frameNamer.next();
-    reset();
-    waveOffset = (float)i / frameCount;
-    replayActions();
-    updateOutputImage(0);
+    updateOutputImage((float)i / frameCount / repeatCount);
 
     outputImage.save(filename);
   }
