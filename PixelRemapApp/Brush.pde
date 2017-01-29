@@ -116,7 +116,7 @@ class Brush {
       if (x < 0 || x >= _imageWidth) continue;
       for (int y = targetY - halfHeight; y <= targetY + halfHeight; y++) {
         if (y < 0 || y >= _imageWidth) continue;
-        _image.setFloatValue(x, y, constrain(_image.getFloatValue(x, y) + _brushSettings.value(), 0, 1));
+        _image.setFloatValue(x, y, blendFloatValue(_image.getFloatValue(x, y), _brushSettings.value()));
       }
     }
   }
@@ -136,8 +136,7 @@ class Brush {
         factor = getFalloff(factor);
         factor = constrain(factor, 0, 1);
 
-        float currentValue = _image.getFloatValue(x, y);
-        _image.setFloatValue(x, y, constrain(currentValue + factor * _brushSettings.value(), 0, 1));
+        _image.setFloatValue(x, y, blendFloatValue(_image.getFloatValue(x, y), factor * _brushSettings.value()));
       }
     }
   }
