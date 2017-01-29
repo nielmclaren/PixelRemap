@@ -178,6 +178,7 @@ void setupPalette() {
     .repeatCount(1)
     .isMirrored(false)
     .isReversed(false)
+    .addFilename("stripe02.png")
     .addFilename("wood.png")
     .addFilename("cavegrad.png")
     .addFilename("mirage_sunset_dark.png")
@@ -186,7 +187,6 @@ void setupPalette() {
     .addFilename("doraemon_palette.png")
     .addFilename("halograd.png")
     .addFilename("neon.png")
-    .addFilename("stripe02.png")
     .addFilename("flake01.png");
   paletteChanged();
 }
@@ -259,27 +259,6 @@ void reset() {
   inputImage.endDraw();
 
   inputImage.loadPixels();
-
-  deepImage.setImage(inputImage);
-
-  drawThing();
-}
-
-void drawThing() {
-  float noiseScale = 0.001;
-  float offsetX = random(1);
-  float offsetY = random(1);
-  println("Noise offset: " + offsetX + ", " + offsetY);
-
-  inputImage.beginDraw();
-  inputImage.loadPixels();
-  for (int x = 0; x < imageWidth; x++) {
-    for (int y = 0; y < imageHeight; y++) {
-      inputImage.pixels[y * imageWidth + x] = color(noise(offsetX + x * noiseScale, offsetY + y * noiseScale) * 255);
-    }
-  }
-  inputImage.updatePixels();
-  inputImage.endDraw();
 
   deepImage.setImage(inputImage);
 }
@@ -451,10 +430,12 @@ void saveAnimation() {
 
 void toggleBlendMode() {
   if (brush.brushSettings().blendMode() == BlendMode.ADD) {
+    println("Blend mode: subtract");
     BrushSettings settings = brush.brushSettings();
     settings.blendMode(BlendMode.SUBTRACT);
     brush.brushSettings(settings);
   } else {
+    println("Blend mode: add");
     brush.brushSettings(
         brush.brushSettings().blendMode(BlendMode.ADD));
   }
